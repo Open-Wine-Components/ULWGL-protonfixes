@@ -13,7 +13,6 @@ CONF_FILE = '~/.config/protonfixes/config.ini'
 DEFAULT_CONF = """
 [main]
 enable_checks = true
-enable_splash = false
 enable_global_fixes = true
 
 
