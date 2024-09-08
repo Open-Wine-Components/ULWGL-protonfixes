@@ -24,9 +24,9 @@ The order is not important and the arguments are not passed on to the game.
 
 The easiest way to implement a new fix or modify an existing one, is to use local fixes.
 
-First of all, you should find the Steam-ID of the game (right click in your Steam library -> ) and use it as the filename, with a `.py` extension.
+First of all, you should find the Steam-ID of the game (right click the game in your Steam library -> 'Properties...' -> 'Updates' -> 'App ID:') and use it as the filename, with a `.py` extension.
 
-Example `Day of Defeat: Source`:
+Example `Day of Defeat: Source` (AppID 300):
 
 > ~/.config/protonfixes/localfixes/300.py
 
