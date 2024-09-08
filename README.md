@@ -106,7 +106,7 @@ We do enforce some linting and testing that can and should be done locally - bef
 To install the necessary tools, just run:
 
 ```bash
-python3 -m pip install --upgrade pip
+python -m pip install --upgrade pip
 pip install ruff
 ```
 
@@ -133,4 +133,17 @@ You can still run it though:
 ```bash
 cd .github/scripts
 python check_gamefixes.py
+```
+
+You need the following prerequisites:
+
+```bash
+python -m pip install --upgrade pip
+pip install ijson
+```
+
+On Arch / Manjaro:
+
+```bash
+sudo pacman -Sy python-ijson
 ```
