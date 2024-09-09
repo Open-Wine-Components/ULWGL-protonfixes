@@ -124,6 +124,12 @@ ruff check .
 
 You are good to go when you see the message `All checks passed!`.
 
+If not, try letting `ruff` (the linter we use) fix it automatically:
+
+```bash
+ruff format .
+```
+
 ### Testing
 
 The filenames of the fixes are checked against the Steam and GOG APIs. All symbolic links are also checked. This is not mandatory to run locally, as you should have a working game fix to begin with, and it will be done automatically by Github's CI.
