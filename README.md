@@ -24,6 +24,8 @@ The order is not important and the arguments are not passed on to the game.
 
 The easiest way to implement a new fix or modify an existing one, is to use local fixes.
 
+### Game fixes
+
 First of all, you should find the Steam-ID of the game (right click the game in your Steam library -> 'Properties...' -> 'Updates' -> 'App ID:') and use it as the filename, with a `.py` extension.
 
 Example `Day of Defeat: Source` (AppID 300):
@@ -37,6 +39,20 @@ Another type of fix is one that runs before each game. This allows you to set de
 Note that local fixes override the included "global" fixes. So using an existing fix might be a good starting point for modifications, as they will not be executed.
 
 For example, overriding the default fix will disable [the parameter parsing for Steam games](#start-parameter-fixes). This can be restored by copying [the global default file](gamefixes-steam/default.py) and applying your changes accordingly.
+
+### Verbs
+
+You can also add local Winetricks verbs, just like the ones implemented [here](verbs).
+
+This also allows you to override existing Protontricks and Winetricks verbs, for example if a URL or file hash has changed.
+
+> ~/.config/protonfixes/localfixes/<verb_name>.verb
+
+To call them, just use the default function:
+
+```python
+util.protontricks('<verb_name>')
+```
 
 ## Non-Steam games
 
