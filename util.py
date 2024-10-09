@@ -13,7 +13,7 @@ import subprocess
 import urllib.request
 import functools
 from socket import socket, AF_INET, SOCK_DGRAM
-from typing import Literal, Any, Callable, Union
+from typing import Literal, Any, Callable, Union, Optional
 from collections.abc import Mapping, Generator
 
 try:
@@ -28,8 +28,11 @@ try:
 except ImportError:
     log.warn('Unable to hook into Proton main script environment')
 
+# TypeAliases
+BasePathType = Literal['user', 'game']
 
-def which(appname: str) -> Union[str, None]:
+
+def which(appname: str) -> Optional[str]:
     """Returns the full path of an executable in $PATH"""
     for path in os.environ['PATH'].split(os.pathsep):
         fullpath = os.path.join(path, appname)
@@ -50,7 +53,7 @@ def protonprefix() -> str:
     return os.path.join(os.environ['STEAM_COMPAT_DATA_PATH'], 'pfx/')
 
 
-def protonnameversion() -> Union[str, None]:
+def protonnameversion() -> Optional[str]:
     """Returns the version of proton from sys.argv[0]"""
     version = re.search('Proton ([0-9]*\\.[0-9]*)', sys.argv[0])
     if version:
@@ -73,7 +76,7 @@ def protontimeversion() -> int:
     return 0
 
 
-def protonversion(timestamp: bool = False) -> Union[str, None, int]:
+def protonversion(timestamp: bool = False) -> Optional[Union[str, int]]:
     """Returns the version of proton"""
     if timestamp:
         return protontimeversion()
@@ -81,8 +84,8 @@ def protonversion(timestamp: bool = False) -> Union[str, None, int]:
 
 
 def once(
-    func: Union[Callable, None] = None, retry: bool = False
-) -> Union[None, Callable[..., Any]]:
+    func: Optional[Callable] = None, retry: bool = False
+) -> Callable[..., Any]:
     """Decorator to use on functions which should only run once in a prefix.
 
     Error handling:
@@ -292,9 +295,9 @@ def protontricks(verb: str) -> bool:
 
 def regedit_add(
     folder: str,
-    name: Union[str, None] = None,
-    typ: Union[str, None] = None,
-    value: Union[str, None] = None,
+    name: Optional[str] = None,
+    typ: Optional[str] = None,
+    value: Optional[str] = None,
     arch: bool = False,
 ) -> None:
     """Add regedit keys"""
@@ -643,7 +646,7 @@ def _get_case_insensitive_name(path: str) -> str:
     return root
 
 
-def _get_config_full_path(cfile: str, base_path: str) -> Union[str, None]:
+def _get_config_full_path(cfile: str, base_path: BasePathType) -> Optional[str]:
     """Find game's config file"""
     # Start from 'user'/'game' directories or absolute path
     if base_path == 'user':
@@ -674,7 +677,7 @@ def create_backup_config(cfg_path: str) -> None:
 
 
 def set_ini_options(
-    ini_opts: str, cfile: str, encoding: str, base_path: str = 'user'
+    ini_opts: str, cfile: str, encoding: str, base_path: BasePathType = 'user'
 ) -> bool:
     """Edit game's INI config file"""
     cfg_path = _get_config_full_path(cfile, base_path)
@@ -700,7 +703,7 @@ def set_ini_options(
 
 
 def set_xml_options(
-    base_attibutte: str, xml_line: str, cfile: str, base_path: str = 'user'
+    base_attibutte: str, xml_line: str, cfile: str, base_path: BasePathType = 'user'
 ) -> bool:
     """Edit game's XML config file"""
     xml_path = _get_config_full_path(cfile, base_path)
