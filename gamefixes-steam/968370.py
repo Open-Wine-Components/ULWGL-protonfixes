@@ -6,5 +6,5 @@ from protonfixes import util
 
 
 def main() -> None:
-    util.winedll_override('d3d9', 'd')
+    util.winedll_override('d3d9', '')
     util.protontricks('segoe_script')

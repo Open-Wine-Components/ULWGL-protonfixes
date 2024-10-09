@@ -7,4 +7,4 @@ from protonfixes import util
 
 
 def main() -> None:
-    util.winedll_override('xaudio2_7', 'd')
+    util.winedll_override('xaudio2_7', '')
