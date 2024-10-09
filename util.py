@@ -30,7 +30,7 @@ except ImportError:
 
 # TypeAliases
 BasePathType = Literal['user', 'game']
-
+OverrideTypes = Literal['n', 'b', 'n,b', 'b,n', '']
 
 def which(appname: str) -> Optional[str]:
     """Returns the full path of an executable in $PATH"""
@@ -413,7 +413,7 @@ def get_game_install_path() -> str:
     return install_path
 
 
-def winedll_override(dll: str, dtype: Literal['n', 'b', 'n,b', 'b,n', '']) -> None:
+def winedll_override(dll: str, dtype: OverrideTypes) -> None:
     """Add WINE dll override"""
     log.info(f'Overriding {dll}.dll = {dtype}')
     setting = f'{dll}={dtype}'
