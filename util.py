@@ -405,11 +405,8 @@ def del_environment(envvar: str) -> None:
 
 def get_game_install_path() -> str:
     """Game installation path"""
-    install_path = os.environ['PWD']
-    if 'STEAM_COMPAT_INSTALL_PATH' in os.environ:
-        install_path = os.environ['STEAM_COMPAT_INSTALL_PATH']
-    log.debug('Detected path to game: ' + install_path)
-    # only for `waitforexitandrun` command
+    install_path = os.environ.get('STEAM_COMPAT_INSTALL_PATH', os.getcwd())
+    log.debug(f'Detected path to game: {install_path}')
     return install_path
 
 
