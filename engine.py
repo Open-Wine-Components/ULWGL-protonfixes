@@ -9,7 +9,7 @@ class Engine:
     """Game engines"""
 
     def __init__(self) -> None:  # noqa: D107
-        self.engine_name = None
+        self.engine_name = ''
         self.supported = {
             'Dunia 2': 'https://pcgamingwiki.com/wiki/Engine:Dunia_2',
             'Unity': 'https://pcgamingwiki.com/wiki/Engine:Unity',
@@ -33,7 +33,7 @@ class Engine:
         else:
             log.info('Engine: unknown Game engine')
 
-        if self.engine_name is not None:
+        if self.engine_name:
             log.info('Engine: ' + self.engine_name)
             log.info('Engine: ' + self.supported[self.engine_name])
 
@@ -101,7 +101,7 @@ class Engine:
         """Report Engine name"""
         return self.engine_name
 
-    def set(self, _engine: str = None) -> bool:
+    def set(self, _engine: str) -> bool:
         """Force engine"""
         if _engine in self.supported:
             self.engine_name = _engine
@@ -167,7 +167,7 @@ class Engine:
             return False
         return True
 
-    def resolution(self, res: str = None) -> bool:
+    def resolution(self, res: str) -> bool:
         """Force screen resolution"""
         if not isinstance(res, str):
             self._log('resolution', 'not provided')

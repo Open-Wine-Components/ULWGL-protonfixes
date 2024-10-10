@@ -36,7 +36,7 @@ def get_game_id() -> str:
         return re.findall(r'\d+', os.environ['STEAM_COMPAT_DATA_PATH'])[-1]
 
     log.crit('Game ID not found in environment variables')
-    return None
+    exit()
 
 
 @lru_cache

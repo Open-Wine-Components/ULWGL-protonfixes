@@ -1,7 +1,6 @@
 """Utilities to make gamefixes easier"""
 
 import configparser
-from io import TextIOWrapper
 import os
 import sys
 import re
@@ -12,6 +11,8 @@ import zipfile
 import subprocess
 import urllib.request
 import functools
+from io import TextIOWrapper
+from pathlib import Path
 from socket import socket, AF_INET, SOCK_DGRAM
 from typing import Literal, Any, Callable, Union, Optional
 from collections.abc import Mapping, Generator
@@ -29,6 +30,7 @@ except ImportError:
     log.warn('Unable to hook into Proton main script environment')
 
 # TypeAliases
+StrPath = Union[str, Path]
 BasePathType = Literal['user', 'game']
 OverrideTypes = Literal['n', 'b', 'n,b', 'b,n', '']
 
@@ -585,7 +587,7 @@ def disable_uplay_overlay() -> bool:
 
 
 def create_dosbox_conf(
-    conf_file: str, conf_dict: Mapping[str, Mapping[str, Any]]
+    conf_file: StrPath, conf_dict: Mapping[str, Mapping[str, Any]]
 ) -> None:
     """Create DOSBox configuration file.
 
@@ -643,7 +645,7 @@ def _get_case_insensitive_name(path: str) -> str:
     return root
 
 
-def _get_config_full_path(cfile: str, base_path: BasePathType) -> Optional[str]:
+def _get_config_full_path(cfile: StrPath, base_path: BasePathType) -> Optional[str]:
     """Find game's config file"""
     # Start from 'user'/'game' directories or absolute path
     if base_path == 'user':
@@ -655,7 +657,7 @@ def _get_config_full_path(cfile: str, base_path: BasePathType) -> Optional[str]:
             cfg_path = os.path.join(get_game_install_path(), cfile)
         else:
             cfg_path = cfile
-    cfg_path = _get_case_insensitive_name(cfg_path)
+    cfg_path = _get_case_insensitive_name(str(cfg_path))
 
     if os.path.exists(cfg_path) and os.access(cfg_path, os.F_OK):
         log.debug('Found config file: ' + cfg_path)
@@ -674,7 +676,7 @@ def create_backup_config(cfg_path: str) -> None:
 
 
 def set_ini_options(
-    ini_opts: str, cfile: str, encoding: str, base_path: BasePathType = 'user'
+    ini_opts: str, cfile: StrPath, encoding: str, base_path: BasePathType = 'user'
 ) -> bool:
     """Edit game's INI config file"""
     cfg_path = _get_config_full_path(cfile, base_path)
@@ -687,7 +689,8 @@ def set_ini_options(
     conf = configparser.ConfigParser(
         empty_lines_in_values=True, allow_no_value=True, strict=False
     )
-    conf.optionxform = str
+    # Preserve option name case (default converts to lower case)
+    conf.optionxform = lambda optionstr: optionstr
 
     conf.read(cfg_path, encoding)
 
@@ -700,7 +703,7 @@ def set_ini_options(
 
 
 def set_xml_options(
-    base_attibutte: str, xml_line: str, cfile: str, base_path: BasePathType = 'user'
+    base_attibutte: str, xml_line: str, cfile: StrPath, base_path: BasePathType = 'user'
 ) -> bool:
     """Edit game's XML config file"""
     xml_path = _get_config_full_path(cfile, base_path)
@@ -761,14 +764,15 @@ def read_dxvk_conf(cfp: TextIOWrapper) -> Generator[str, None, None]:
 
 
 def set_dxvk_option(
-    opt: str, val: str, cfile: str = '/tmp/protonfixes_dxvk.conf'
+    opt: str, val: str, cfile: StrPath = '/tmp/protonfixes_dxvk.conf'
 ) -> None:
     """Create custom DXVK config file
 
     See https://github.com/doitsujin/dxvk/wiki/Configuration for details
     """
     conf = configparser.ConfigParser()
-    conf.optionxform = str
+    # Preserve option name case (default converts to lower case)
+    conf.optionxform = lambda optionstr: optionstr
     section = conf.default_section
     dxvk_conf = os.path.join(os.environ['PWD'], 'dxvk.conf')
 
@@ -779,10 +783,11 @@ def set_dxvk_option(
         or conf.getint(section, 'session') != os.getpid()
     ):
         log.info('Creating new DXVK config')
-        set_environment('DXVK_CONFIG_FILE', cfile)
+        set_environment('DXVK_CONFIG_FILE', str(cfile))
 
         conf = configparser.ConfigParser()
-        conf.optionxform = str
+        # Preserve option name case (default converts to lower case)
+        conf.optionxform = lambda optionstr: optionstr
         conf.set(section, 'session', str(os.getpid()))
 
         if os.access(dxvk_conf, os.F_OK):
@@ -808,7 +813,7 @@ def install_battleye_runtime() -> None:
     install_app('1161040')
 
 
-def install_all_from_tgz(url: str, path: str = os.getcwd()) -> None:
+def install_all_from_tgz(url: str, path: StrPath = os.getcwd()) -> None:
     """Install all files from a downloaded tar.gz"""
     cache_dir = os.path.expanduser('~/.cache/protonfixes')
     os.makedirs(cache_dir, exist_ok=True)
@@ -824,7 +829,7 @@ def install_all_from_tgz(url: str, path: str = os.getcwd()) -> None:
         tgz_obj.extractall(path)
 
 
-def install_from_zip(url: str, filename: str, path: str = os.getcwd()) -> None:
+def install_from_zip(url: str, filename: str, path: StrPath = os.getcwd()) -> None:
     """Install a file from a downloaded zip"""
     if filename in os.listdir(path):
         log.info(f'File {filename} found in {path}')
