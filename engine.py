@@ -2,7 +2,8 @@
 
 import os
 import sys
-from .logger import log
+
+from .logger import log, LogLevelType
 
 
 class Engine:
@@ -88,14 +89,12 @@ class Engine:
         """Detect Unreal Engine 4"""
         return False
 
-    def _log(self, ctx: str, msg: str, warn: bool = False) -> None:
+    def _log(self, ctx: str, msg: str, level: LogLevelType = 'INFO') -> None:
         """Log wrapper"""
         if self.engine_name is None:
             log.warn(ctx + ': Engine not defined')
             return
-
-        log_func = log.warn if warn else log.info
-        log_func(f'{self.engine_name}: {ctx}: {msg}')
+        log.log(f'{self.engine_name}: {ctx}: {msg}', level)
 
     def name(self) -> str:
         """Report Engine name"""
@@ -117,7 +116,7 @@ class Engine:
             self._add_argument('-nosplash')
             self._log('nosplash', 'splash screen disabled')
         else:
-            self._log('nosplash', 'not supported', True)
+            self._log('nosplash', 'not supported', 'WARN')
             return False
         return True
 
@@ -127,7 +126,7 @@ class Engine:
             self._add_argument('-help')
             self._log('info', 'command line arguments')
         else:
-            self._log('info', 'not supported', True)
+            self._log('info', 'not supported', 'WARN')
             return False
         return True
 
@@ -140,7 +139,7 @@ class Engine:
             self._add_argument('-skipintro')
             self._log('nointro', 'intro videos disabled')
         else:
-            self._log('nointro', 'not supported', True)
+            self._log('nointro', 'not supported', 'WARN')
             return False
         return True
 
@@ -150,7 +149,7 @@ class Engine:
             self._add_argument('-show-screen-selector')
             self._log('launcher', 'forced')
         else:
-            self._log('launcher', 'not supported', True)
+            self._log('launcher', 'not supported', 'WARN')
             return False
         return True
 
@@ -163,14 +162,14 @@ class Engine:
             self._add_argument('-windowed')
             self._log('windowed', 'window')
         else:
-            self._log('windowed', 'not supported', True)
+            self._log('windowed', 'not supported', 'WARN')
             return False
         return True
 
     def resolution(self, res: str) -> bool:
         """Force screen resolution"""
         if not isinstance(res, str):
-            self._log('resolution', 'not provided')
+            self._log('resolution', 'not provided', 'WARN')
             return False
 
         res_wh = res.split('x')
@@ -184,7 +183,7 @@ class Engine:
             self._add_argument('-width ' + res_wh[0] + ' -height ' + res_wh[1])
             self._log('resolution', res)
         else:
-            self._log('resolution', 'not supported', True)
+            self._log('resolution', 'not supported', 'WARN')
             return False
         return True
 
