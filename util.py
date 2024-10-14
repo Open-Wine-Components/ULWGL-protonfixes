@@ -14,8 +14,8 @@ import functools
 from io import TextIOWrapper
 from pathlib import Path
 from socket import socket, AF_INET, SOCK_DGRAM
-from typing import Literal, Any, Callable, Union, Optional
-from collections.abc import Mapping, Generator
+from typing import Literal, Any, Union, Optional
+from collections.abc import Mapping, Generator, Callable
 
 try:
     from .logger import log
@@ -960,15 +960,10 @@ def set_game_drive(enabled: bool) -> None:
     This function modifies the `compat_config` to include or exclude
     the "gamedrive" option based on the `enabled` parameter.
 
-    Parameters
-    ----------
-    enabled : bool
-        If True, add "gamedrive" to `compat_config`.
-        If False, remove "gamedrive" from `compat_config`.
-
-    Returns
-    -------
-    None
+    Args:
+        enabled (bool):
+            If True, add "gamedrive" to `compat_config`.
+            If False, remove "gamedrive" from `compat_config`.
 
     """
     if enabled:
