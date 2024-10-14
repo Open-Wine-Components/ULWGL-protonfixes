@@ -1,0 +1,21 @@
+[project]
+name = "umu-protonfixes"
+description = "Stop gap solution to fix issues in games that run under Wine."
+keywords = ["proton", "protontricks", "wine", "winetricks", "linux", "gaming"]
+license = {file = "LICENSE"}
+requires-python = "3.9"
+
+
+[project.urls]
+Repository = "https://github.com/Open-Wine-Components/umu-protonfixes.git"
+Issues = "https://github.com/Open-Wine-Components/umu-protonfixes/issues"
+
+
+[tool.pyright]
+exclude = [
+    "**/__pycache__",
+    "subprojects",
+    "verbs"
+]
+pythonVersion = "3.9"
+pythonPlatform = "Linux"
