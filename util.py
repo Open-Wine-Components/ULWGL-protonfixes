@@ -34,15 +34,6 @@ StrPath = Union[str, Path]
 BasePathType = Literal['user', 'game']
 OverrideTypes = Literal['n', 'b', 'n,b', 'b,n', '']
 
-def which(appname: str) -> Optional[str]:
-    """Returns the full path of an executable in $PATH"""
-    for path in os.environ['PATH'].split(os.pathsep):
-        fullpath = os.path.join(path, appname)
-        if os.path.exists(fullpath) and os.access(fullpath, os.X_OK):
-            return fullpath
-    log.warn(str(appname) + 'not found in $PATH')
-    return None
-
 
 def protondir() -> str:
     """Returns the path to proton"""
