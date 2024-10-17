@@ -1,14 +1,18 @@
 """Game fix for Serious Sam 4"""
 
-import os
-import subprocess
+from pathlib import Path
 
 
 def main() -> None:
     """Graphics API workaround"""
-    if not os.path.isfile('UserCfg.lua.bak'):
-        subprocess.call(['cp', 'UserCfg.lua', 'UserCfg.lua.bak'])
+    lua_file = Path('UserCfg.lua')
+    bak_file = lua_file.with_suffix('.lua.bak')
 
-        # Assume UTF-8
-        with open('UserCfg.lua', 'a+', encoding='utf-8') as f:
-            f.write('sfx_strAPI = "OpenAL";')
+    if bak_file.is_file():
+        return
+    
+    text = lua_file.read_text('utf-8')
+    text += '\nsfx_strAPI = "OpenAL";'
+
+    lua_file.rename(bak_file)
+    lua_file.write_text(text, 'utf-8')

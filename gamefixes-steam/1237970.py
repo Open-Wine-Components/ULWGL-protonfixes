@@ -1,16 +1,13 @@
 """Game fix for Titanfall 2"""
 
-import os
-import subprocess
-import glob
 from protonfixes import util
 
 
 def main() -> None:
     """Allow -northstar option to work"""
-    # Define game directory
-    install_dir = glob.escape(util.get_game_install_path())
+    # Path of backup file
+    backup_file = util.get_game_install_path() / 'Titanfall2.exe.bak'
 
     # Restore original titanfall2.exe if NorthstarLauncher.exe was previously symlinked
-    if os.path.isfile(install_dir + '/Titanfall2.exe.bak'):
-        subprocess.run(['mv', 'Titanfall2.exe.bak', 'Titanfall2.exe'], check=False)
+    if backup_file.is_file():
+        backup_file.rename(backup_file.with_suffix(''))

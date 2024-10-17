@@ -5,10 +5,12 @@ injection framework files
 """
 
 import os
+
 from hashlib import sha256
 from tempfile import mkdtemp
 from urllib.request import urlopen
 from zipfile import ZipFile, is_zipfile
+from pathlib import Path
 
 from protonfixes import util
 from protonfixes.logger import log
@@ -23,36 +25,28 @@ hashsum_config = 'aecb441fdc9c9e2ba78df63dfbe14f48c31dfd5ad571adba988ba362fc8143
 
 
 def main() -> None:
-    tmp = f'{mkdtemp()}/d3d9-2206220222.zip'
+    tmp = Path(mkdtemp()) / 'd3d9-2206220222.zip'
     install_dir = util.get_game_install_path()
-    path_config = f'{install_dir}/config.json'
-    path_dll = f'{install_dir}/d3d9.dll'
+    path_config = install_dir / 'config.json'
+    path_dll = install_dir / 'd3d9.dll'
     hashsum = sha256()
 
     # Ensure that the text injection files do not already exist before opening
-    if not os.path.isfile(path_config) or not os.path.isfile(path_dll):
+    if not path_config.is_file() or not path_dll.is_dir():
         log.warn(
             f"File 'config.json' or 'd3d9.dll' not found in '{install_dir}', skipping..."
         )
         return
 
-    config = open(path_config, mode='rb')
-    dll = open(path_dll, mode='rb')
-
     # Check if the text injection framework files have already been replaced
     if (
-        sha256(config.read()).hexdigest() == hashsum_config
-        and sha256(dll.read()).hexdigest() == hashsum_d3d9
+        sha256(path_config.read_bytes()).hexdigest() == hashsum_config
+        and sha256(path_dll.read_bytes()).hexdigest() == hashsum_d3d9
     ):
         log.info(
             "Fix for 'Flowers - Le Volume Sur Hiver' has already been applied, skipping..."
         )
-        config.close()
-        dll.close()
         return
-
-    config.close()
-    dll.close()
 
     # Download the archive
     with urlopen(arc, timeout=30) as resp:
@@ -60,7 +54,7 @@ def main() -> None:
             log.warn(f'github returned the status code: {resp.status}')
             return
 
-        with open(tmp, mode='wb', buffering=0) as file:
+        with tmp.open('wb', 0) as file:
             chunk_size = 64 * 1024  # 64 KB
             buffer = bytearray(chunk_size)
             view = memoryview(buffer)
@@ -81,9 +75,10 @@ def main() -> None:
     # Rename the old files and apply the fix
     randstr = os.urandom(16).hex()
     log.info(f"Renaming 'config.json' -> '.{randstr}.config.json.bak'")
+    path_config.rename(install_dir / f'.{randstr}.config.json.bak')
+
     log.info(f"Renaming 'd3d9.dll' -> '.{randstr}.d3d9.dll.bak'")
-    os.rename(path_config, f'{install_dir}/.{randstr}.config.json.bak')
-    os.rename(path_dll, f'{install_dir}/.{randstr}.d3d9.dll.bak')
+    path_dll.rename(install_dir / f'.{randstr}.d3d9.dll.bak')
 
     with ZipFile(tmp, mode='r') as zipfile:
         log.info("Fixing in-game font for 'Flowers - Le Volume Sur Hiver'...")

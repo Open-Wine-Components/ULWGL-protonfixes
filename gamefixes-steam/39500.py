@@ -1,6 +1,5 @@
-"""Game fix for Gothic 3"""
+"""Game fix for Gothic 3 (and Forsaken Gods Enhanced Edition)"""
 
-import os
 from protonfixes import util
 
 
@@ -12,4 +11,4 @@ def main() -> None:
     FpS.Max=0
     """
 
-    util.set_ini_options(game_opts, os.path.join('Ini', 'ge3.ini'), 'cp1251', 'game')
+    util.set_ini_options(game_opts, 'Ini/ge3.ini', 'cp1251', 'game')

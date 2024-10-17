@@ -13,6 +13,7 @@ import urllib.request
 import functools
 
 from pathlib import Path
+from dataclasses import dataclass
 from datetime import datetime, timezone
 from socket import socket, AF_INET, SOCK_DGRAM
 from typing import Literal, Any, Union, Optional
@@ -29,6 +30,19 @@ try:
     import __main__ as protonmain
 except ImportError:
     log.warn('Unable to hook into Proton main script environment')
+
+
+# TypeAliases
+StrPath = Union[str, Path]
+DosDeviceTypes = Literal['hd', 'network', 'floppy', 'cdrom']
+
+
+@dataclass
+class ReplaceType:
+    """Used for replacements"""
+
+    from_value: str
+    to_value: str
 
 
 class ProtonVersion:
@@ -53,8 +67,14 @@ def protondir() -> Path:
 
 @functools.lru_cache
 def protonprefix() -> Path:
-    """Returns the wineprefix used by proton"""
+    """Returns wineprefix's path used by proton"""
     return Path(os.environ.get('STEAM_COMPAT_DATA_PATH', '')) / 'pfx'
+
+
+@functools.lru_cache
+def get_path_syswow64() -> Path:
+    """Returns the syswow64's path in the prefix"""
+    return protonprefix() / 'drive_c/windows/syswow64'
 
 
 @functools.lru_cache
@@ -621,7 +641,7 @@ def _get_case_insensitive_name(path: Path) -> Path:
     return resolved
 
 
-def _get_config_full_path(cfile: str, base_path: str) -> Optional[Path]:
+def _get_config_full_path(cfile: StrPath, base_path: str) -> Optional[Path]:
     """Find game's config file"""
     # Start from 'user'/'game' directories or absolute path
     if base_path == 'user':
@@ -651,7 +671,7 @@ def create_backup_config(cfg_path: Path) -> bool:
 
 
 def set_ini_options(
-    ini_opts: str, cfile: str, encoding: str, base_path: str = 'user'
+    ini_opts: str, cfile: StrPath, encoding: str, base_path: str = 'user'
 ) -> bool:
     """Edit game's INI config file"""
     cfg_path = _get_config_full_path(cfile, base_path)
@@ -677,7 +697,7 @@ def set_ini_options(
 
 
 def set_xml_options(
-    base_attibutte: str, xml_line: str, cfile: str, base_path: str = 'user'
+    base_attibutte: str, xml_line: str, cfile: StrPath, base_path: str = 'user'
 ) -> bool:
     """Edit game's XML config file"""
     xml_path = _get_config_full_path(cfile, base_path)
@@ -772,7 +792,7 @@ def install_battleye_runtime() -> None:
     install_app('1161040')
 
 
-def install_all_from_tgz(url: str, path: Path = get_game_install_path()) -> None:
+def install_all_from_tgz(url: str, path: StrPath = get_game_install_path()) -> None:
     """Install all files from a downloaded tar.gz"""
     cache_dir = os.path.expanduser('~/.cache/protonfixes')
     os.makedirs(cache_dir, exist_ok=True)
@@ -919,18 +939,69 @@ def set_game_drive(enabled: bool) -> None:
     This function modifies the `compat_config` to include or exclude
     the "gamedrive" option based on the `enabled` parameter.
 
-    Parameters
-    ----------
-    enabled : bool
-        If True, add "gamedrive" to `compat_config`.
-        If False, remove "gamedrive" from `compat_config`.
-
-    Returns
-    -------
-    None
+    Args:
+        enabled (bool):
+            If True, add "gamedrive" to `compat_config`.
+            If False, remove "gamedrive" from `compat_config`.
 
     """
     if enabled:
         protonmain.g_session.compat_config.add('gamedrive')
     else:
-        protonmain.g_session.compat_config.discard('gamedrive')
+        protonmain.g_session.compat_config.discard("gamedrive")
+
+
+def create_dos_device(letter: str = 'r', dev_type: DosDeviceTypes = 'cdrom') -> bool:
+    """Create a symlink to '/tmp' in the dosdevices folder of the prefix and register it
+
+    Args:
+        letter (str, optional): Letter that the device gets assigned to, must be len = 1
+        dev_type (DosDeviceTypes, optional): The device's type which will be registered to wine
+
+    Returns:
+        bool: True, if device was created
+
+    """
+    assert len(letter) == 1
+
+    dosdevice = protonprefix() / f'dosdevices/{letter}:'
+    if dosdevice.exists():
+        return False
+
+    # Create a symlink in dosdevices
+    dosdevice.symlink_to('/tmp', True)
+
+    # designate device as CD-ROM, requires 64-bit access
+    regedit_add('HKLM\\Software\\Wine\\Drives', f'{letter}:', 'REG_SZ', dev_type, True)
+    return True
+
+
+def patch_conf_value(file: Path, key: str, value: ReplaceType) -> None:
+    """Patches a single value in the given config file
+
+    Args:
+        file (Path): Path to the config file to patch
+        key (str): The key of the value to patch
+        value (ReplaceType): The value that should be replaced
+
+    """
+    if not file.is_file():
+        log.warn(f'File "{file}" can not be opened to patch config value.')
+        return
+
+    conf = file.read_text()
+    regex = rf"^\s*(?P<name>{key}\s*=\s*)(?P<value>{value.from_value})\s*$"
+    conf = re.sub(regex, rf'\g<name>{value.to_value}', conf, flags=re.MULTILINE)
+    file.write_text(conf)
+
+
+def patch_voodoo_conf(file: Path = get_path_syswow64() / 'dgvoodoo.conf', key: str = 'Resolution', value: ReplaceType = ReplaceType('unforced', 'max')) -> None:
+    """Patches the dgVoodoo2 config file. By default `Resolution` will be set from `unforced` to `max`.
+
+    Args:
+        file (Path, optional): Path to the config file to patch
+        key (str, optional): The key of the value to patch
+        value (ReplaceType, optional): The value that should be replaced
+
+    """
+    patch_conf_value(file, key, value)
