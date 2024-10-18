@@ -192,8 +192,8 @@ class TestProtonfixes(unittest.TestCase):
         self.assertTrue('SteamGameId' not in os.environ, 'SteamGameId is set')
         self.assertTrue('UMU_ID' not in os.environ, 'UMU_ID is set')
         self.assertTrue('SteamAppId' not in os.environ, 'SteamAppId is set')
-        result = func()
-        self.assertFalse(result, 'None was not returned')
+        with self.assertRaises(SystemExit):
+            func()
 
     def testGetStoreNameZoom(self):
         """Pass zoomplatform as store name

@@ -85,9 +85,10 @@ def protondir() -> str:
     return os.path.dirname(sys.argv[0])
 
 
+@functools.lru_cache
 def protonprefix() -> str:
-    """Returns the wineprefix used by proton"""
-    return os.path.join(os.environ['STEAM_COMPAT_DATA_PATH'], 'pfx/')
+    """Returns wineprefix's path used by proton"""
+    return os.path.join(os.environ.get('STEAM_COMPAT_DATA_PATH', ''), 'pfx/')
 
 
 def protonnameversion() -> Optional[str]:
