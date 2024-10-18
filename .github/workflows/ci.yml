@@ -33,11 +33,13 @@ jobs:
 
       # FIXME: problem matcher is currently disabled upstream, using a fork for the moment
       # https://github.com/ludeeus/action-shellcheck/pull/103
+      # FIXME: symlinks don't work upstream
+      # https://github.com/ludeeus/action-shellcheck/pull/104
       - name: Run ShellCheck
-        uses: Root-Core/action-shellcheck@master
+        uses: Root-Core/action-shellcheck@fork
         with:
-          format: gcc # gcc is used for the problem matcher
-          additional_files: winetricks # by default, only files with according extensions are checked
+          ignore_paths: subprojects # prevent ShellCheck from checking unrelated files
+          ignore_symlinks: false # winetricks is symlinked
 
       # Ruff uses ruff.toml for it's configuration
       - name: Lint with Ruff
