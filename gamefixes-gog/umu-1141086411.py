@@ -4,7 +4,8 @@ from protonfixes import util
 
 
 def main() -> None:
-    util.winedll_override('d3d8', 'n,b')  # GOG's dxcfg / Steam006 fixes
-    util.winedll_override(
-        'dsound', 'n,b'
-    )  # Ultimate ASI Loader / Silent Hill 4 Randomizer
+    # GOG's dxcfg / Steam006 fixes
+    util.winedll_override('d3d8', util.DllOverride.NATIVE_BUILTIN)
+
+    # Ultimate ASI Loader / Silent Hill 4 Randomizer
+    util.winedll_override('dsound', util.DllOverride.NATIVE_BUILTIN)

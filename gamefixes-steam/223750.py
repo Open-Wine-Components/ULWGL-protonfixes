@@ -8,4 +8,4 @@ def main() -> None:
     util.protontricks('d3dx11_43')
     util.protontricks('d3dcompiler_43')
     util.protontricks('d3dcompiler_47')
-    util.winedll_override('wbemprox', 'n')  # doesn't seem to be strictly needed
+    util.winedll_override('wbemprox', util.DllOverride.NATIVE)  # doesn't seem to be strictly needed

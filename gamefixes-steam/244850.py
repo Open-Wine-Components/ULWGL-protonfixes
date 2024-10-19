@@ -11,6 +11,6 @@ def main() -> None:
   	<gcServer enabled = "true" />
 """
 
-    util.set_xml_options(base_attibutte, game_opts, 'SpaceEngineers.exe.config', 'game')
+    util.set_xml_options(base_attibutte, game_opts, 'SpaceEngineers.exe.config')
 
     util.append_argument('-skipintro')

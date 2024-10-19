@@ -5,4 +5,4 @@ from protonfixes import util
 
 def main() -> None:
     util.protontricks('wmp9')
-    util.winedll_override('winegstreamer', '')
+    util.winedll_override('winegstreamer', util.DllOverride.DISABLED)

@@ -11,7 +11,7 @@ def main() -> None:
 
     # Fix background music / Gothic 2 startup
     util.protontricks('directmusic')
-    util.winedll_override('*dsound', 'b')  # Override registry entry
+    util.winedll_override('*dsound', util.DllOverride.BUILTIN)  # Override registry entry
 
     # Fix crackling audio
     util.set_environment('PULSE_LATENCY_MSEC', '90')
@@ -21,12 +21,12 @@ def main() -> None:
     # Gothic 2: https://steamcommunity.com/sharedfiles/filedetails/?id=2787015529
     #
     # This might also be necessary for the GOG release
-    util.winedll_override('ddraw', 'n,b')
+    util.winedll_override('ddraw', util.DllOverride.NATIVE_BUILTIN)
 
     # Fix extreme mouse stutter and allow additional use of 'GRawInput (mouse fix)' from workshop
     # Gothic 1: https://steamcommunity.com/sharedfiles/filedetails/?id=3054112346
     # Gothic 2: https://steamcommunity.com/sharedfiles/filedetails/?id=3054078559
-    util.winedll_override('dinput', 'n,b')
+    util.winedll_override('dinput', util.DllOverride.NATIVE_BUILTIN)
 
 
 def set_resolution() -> None:
@@ -51,4 +51,4 @@ def set_resolution() -> None:
     """
     )
 
-    util.set_ini_options(game_opts, 'system/Gothic.ini', 'cp1251', 'game')
+    util.set_ini_options(game_opts, 'system/Gothic.ini', 'cp1251')
