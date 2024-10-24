@@ -11,6 +11,12 @@ The [default fix file for Steam](gamefixes-steam/default.py) implements a featur
 ```bash
 -pf_tricks=xliveless -pf_tricks=d3dcompiler_47
 ```
+Additionally, you have the option to replace parts of the executable's path, such as the name of the .exe file.
+Please note that all occurrences of the first part (before the '=') will be replaced. Be careful.
+
+```bash
+-pf_replace_cmd=/launcher.exe=/game.exe -pf_replace_cmd=/demo/=/full_version/
+```
 
 You can also set [dxvk options](https://github.com/doitsujin/dxvk/wiki/Configuration).
 
