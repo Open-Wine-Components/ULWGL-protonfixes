@@ -26,6 +26,14 @@ You can also set [dxvk options](https://github.com/doitsujin/dxvk/wiki/Configura
 
 The order is not important and the arguments are not passed on to the game.
 
+If you don't use `%command%` in your launch options, you can just add the parameters.
+
+If you do, please add it after the `%command%` part, as in this example:
+
+```bash
+mangohud %command% -window -pf_replace_cmd=/launcher.exe=/game.exe -pf_tricks=xliveless
+```
+
 ## Local fixes
 
 The easiest way to implement a new fix or modify an existing one, is to use local fixes.
