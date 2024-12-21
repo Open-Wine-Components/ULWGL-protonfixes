@@ -1,7 +1,7 @@
 """Load configuration settings for protonfixes"""
 
-import os
 from configparser import ConfigParser
+from pathlib import Path
 
 try:
     from .logger import log
@@ -25,7 +25,7 @@ CONF = ConfigParser()
 CONF.read_string(DEFAULT_CONF)
 
 try:
-    CONF.read(os.path.expanduser(CONF_FILE))
+    CONF.read(Path(CONF_FILE).expanduser())
 
 except Exception:
     log.debug('Unable to read config file ' + CONF_FILE)
@@ -38,9 +38,12 @@ def opt_bool(opt: str) -> bool:
 
 locals().update({x: opt_bool(y) for x, y in CONF['main'].items() if 'enable' in x})
 
-locals().update({x: os.path.expanduser(y) for x, y in CONF['path'].items()})
+locals().update({x: Path(y).expanduser() for x, y in CONF['path'].items()})
 
 try:
-    [os.makedirs(os.path.expanduser(d)) for n, d in CONF['path'].items()]
+    [
+        Path(d).expanduser().mkdir(parents=True, exist_ok=True)
+        for n, d in CONF['path'].items()
+    ]
 except OSError:
     pass

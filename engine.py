@@ -3,6 +3,7 @@
 import os
 import sys
 from .logger import log
+from pathlib import Path
 
 
 class Engine:
@@ -48,7 +49,7 @@ class Engine:
 
         # Check .../Gamename_Data/Mono/etc/ dir
         for data_dir in data_list:
-            if os.path.exists(os.path.join(os.environ['PWD'], data_dir, 'Mono/etc')):
+            if Path(os.environ['PWD'], data_dir, 'Mono/etc').exists():
                 return True
 
         return False
@@ -60,9 +61,7 @@ class Engine:
 
         # Check .../data_win*/worlds/multicommon dir
         for data_dir in data_list:
-            if os.path.exists(
-                os.path.join(os.environ['PWD'], data_dir, 'worlds/multicommon')
-            ):
+            if Path(os.environ['PWD'], data_dir, 'worlds/multicommon').exists():
                 return True
 
         return False
@@ -75,7 +74,7 @@ class Engine:
         #        for data_dir in dir_list:
         #            if os.path.exists(os.path.join(os.environ['PWD'], data_dir, 'pc/data/cdimages')):
         #                return True
-        if os.path.exists(os.path.join(os.environ['PWD'], 'pc/data/cdimages')):
+        if Path(os.environ['PWD'], 'pc/data/cdimages'):
             return True
 
         return False

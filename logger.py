@@ -2,6 +2,7 @@
 
 import os
 import sys
+from pathlib import Path
 
 
 class Log:
@@ -30,8 +31,9 @@ class Log:
         fulltext = color + pfx + str(msg) + reset + os.linesep
         sys.stderr.write(fulltext)
         sys.stderr.flush()
-        with open('/tmp/test', 'a', 1, encoding='utf-8') as testfile:
-            testfile.write(logtext)
+
+        with Path('/tmp/test').open(mode='a', encoding='utf-8', buffering=1) as file:
+            file.write(logtext)
 
     def info(self, msg: str) -> None:
         """Wrapper for printing info messages"""

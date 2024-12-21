@@ -1,10 +1,10 @@
 """The Steamhelper allows the installation of Steam apps"""
 
-import os
 import re
 import shutil
 import subprocess
 import time
+from pathlib import Path
 
 
 libpaths = []
@@ -50,8 +50,10 @@ def _is_app_installed(appid: str) -> bool:
 
     is_installed = False
     for librarypath in libraries_path:
-        appmanifest_path = _get_manifest_path(appid, librarypath)
-        if os.path.exists(appmanifest_path):
+        appmanifest_path = Path(
+            librarypath, 'steamapps', f'appmanifest_{str(appid)}.acf'
+        )
+        if appmanifest_path.exists():  # noqa: PTH110
             state = _find_regex_groups(appmanifest_path, REGEX_STATE, 'state')
             if len(state) > 0 and int(state[0]) == 4:
                 is_installed = True
@@ -63,24 +65,17 @@ def _get_steam_libraries_path() -> list:
     """Get Steam Libraries Path"""
     if len(libpaths) == 0:
         for steampath in STEAM_DIRS:
-            libfile = os.path.join(
-                os.path.expanduser(steampath), 'steamapps', 'libraryfolders.vdf'
-            )
-            if os.path.exists(libfile):
+            libfile = Path(steampath, 'steamapps', 'libraryfolders.vdf').expanduser()
+            if libfile.is_file():
                 libpaths.append(_find_regex_groups(libfile, REGEX_LIB, 'path'))
                 break
     return libpaths
 
 
-def _get_manifest_path(appid: str, librarypath: str) -> str:
-    """Get appmanifest path"""
-    return os.path.join(librarypath, 'steamapps', f'appmanifest_{str(appid)}.acf')
-
-
-def _find_regex_groups(path: str, regex: re.Pattern, groupname: str) -> list:
+def _find_regex_groups(path: Path, regex: re.Pattern, groupname: str) -> list:
     """Given a file and a regex with a named group groupname, return an array of all the matches"""
     matches = []
-    with open(path, encoding='ascii') as re_file:
+    with path.open(encoding='ascii') as re_file:
         for line in re_file:
             search = regex.search(line)
             if search:

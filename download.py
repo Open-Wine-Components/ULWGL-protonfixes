@@ -1,9 +1,9 @@
 """Module with helper functions to download from file-hosting providers"""
 
-import os
 import hashlib
 import urllib.request
 import http.cookiejar
+from pathlib import Path
 
 
 GDRIVE_URL = 'https://drive.google.com/uc?id={}&export=download'
@@ -36,16 +36,17 @@ def gdrive_download(gdrive_id: str, path: str) -> None:
     req = urllib.request.Request(f'{url}&confirm={confirm}')
     with urllib.request.urlopen(req, timeout=10) as resp:
         filename = get_filename(resp.getheaders())
-        with open(os.path.join(path, filename), 'wb') as save_file:
+        with Path(path, filename).open('wb') as save_file:
             save_file.write(resp.read())
 
 
 def sha1sum(filename: str) -> str:
     """Computes the sha1sum of the specified file"""
-    if not os.path.isfile(filename):
+    path = Path(filename)
+    if not path.is_file():
         return ''
     hasher = hashlib.sha1()
-    with open(filename, 'rb') as hash_file:
+    with path.open('rb') as hash_file:
         buf = hash_file.read(HASH_BLOCK_SIZE)
         while len(buf) > 0:
             hasher.update(buf)

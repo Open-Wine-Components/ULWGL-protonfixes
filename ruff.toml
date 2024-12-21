@@ -54,7 +54,9 @@ select = [
     "FLY",
     # Simplify and update syntax to our target Python version
     "UP",
-    "D"
+    "D",
+    # Enforce the use of pathlib when working with filesystem paths
+    "PTH",
 ]
 ignore = [
     # Requiring a type for self is deprecated
@@ -84,7 +86,7 @@ dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
 
 [lint.per-file-ignores]
 # Relax docstring-related lint rules for gamefixes
-"gamefixes-*" = ["D103", "D205"]
+"gamefixes-*" = ["D103", "D205", "PTH"]
 
 [format]
 # Like Black, use double quotes for strings.

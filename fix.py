@@ -42,42 +42,45 @@ def get_game_id() -> str:
 def get_game_name() -> str:
     """Trys to return the game name from environment variables"""
     pfx = os.environ.get('WINEPREFIX') or protonmain.g_session.env.get('WINEPREFIX')
-    script_dir = os.path.dirname(os.path.abspath(__file__))
+    script_dir = os.path.dirname(os.path.abspath(__file__))  # noqa: PTH100, PTH120
 
     if os.environ.get('UMU_ID'):
-
-        if os.path.isfile(f'{pfx}/game_title'):
-            with open(f'{pfx}/game_title', encoding='utf-8') as file:
+        if os.path.isfile(f'{pfx}/game_title'):  # noqa: PTH113
+            with open(f'{pfx}/game_title', encoding='utf-8') as file:  # noqa: PTH123
                 return file.readline()
 
         umu_id = os.environ['UMU_ID']
         store = os.getenv('STORE', 'none')
-        csv_file_path = os.path.join(script_dir, 'umu-database.csv')
+        csv_file_path = os.path.join(script_dir, 'umu-database.csv')  # noqa: PTH118
 
         try:
-            with open(csv_file_path, newline='', encoding='utf-8') as csvfile:
+            with open(csv_file_path, newline='', encoding='utf-8') as csvfile:  # noqa: PTH123
                 csvreader = csv.reader(csvfile)
                 for row in csvreader:
                     # Check if the row has enough columns and matches both UMU_ID and STORE
                     if len(row) > 3 and row[3] == umu_id and row[1] == store:
                         title = row[0]  # Title is the first entry
-                        with open(os.path.join(script_dir, 'game_title'), 'w', encoding='utf-8') as file:
+                        with open(  # noqa: PTH123
+                            os.path.join(script_dir, 'game_title'),  # noqa: PTH118
+                            'w',
+                            encoding='utf-8',
+                        ) as file:
                             file.write(title)
                         return title
         except FileNotFoundError:
-            log.warn(f"CSV file not found: {csv_file_path}")
+            log.warn(f'CSV file not found: {csv_file_path}')
         except Exception as ex:
-            log.debug(f"Error reading CSV file: {ex}")
+            log.debug(f'Error reading CSV file: {ex}')
 
-        log.warn("Game title not found in CSV")
+        log.warn('Game title not found in CSV')
         return 'UNKNOWN'
 
     try:
         log.debug('UMU_ID is not in environment')
         game_library = re.findall(r'.*/steamapps', os.environ['PWD'], re.IGNORECASE)[-1]
-        game_manifest = os.path.join(game_library, f'appmanifest_{get_game_id()}.acf')
+        game_manifest = os.path.join(game_library, f'appmanifest_{get_game_id()}.acf')  # noqa: PTH118
 
-        with open(game_manifest, encoding='utf-8') as appmanifest:
+        with open(game_manifest, encoding='utf-8') as appmanifest:  # noqa: PTH123
             for xline in appmanifest.readlines():
                 if 'name' in xline.strip():
                     name = re.findall(r'"[^"]+"', xline, re.UNICODE)[-1]
@@ -129,16 +132,16 @@ def get_module_name(game_id: str, default: bool = False, local: bool = False) ->
 
 def _run_fix_local(game_id: str, default: bool = False) -> bool:
     """Check if a local gamefix is available first and run it"""
-    localpath = os.path.expanduser('~/.config/protonfixes/localfixes')
+    localpath = os.path.expanduser('~/.config/protonfixes/localfixes')  # noqa: PTH111
     module_name = game_id if not default else 'default'
 
     # Check if local gamefix exists
-    if not os.path.isfile(os.path.join(localpath, module_name + '.py')):
+    if not os.path.isfile(os.path.join(localpath, module_name + '.py')):  # noqa: PTH113, PTH118
         return False
 
     # Ensure local gamefixes are importable as modules via PATH
-    with open(os.path.join(localpath, '__init__.py'), 'a', encoding='utf-8'):
-        sys.path.append(os.path.expanduser('~/.config/protonfixes'))
+    with open(os.path.join(localpath, '__init__.py'), 'a', encoding='utf-8'):  # noqa: PTH118, PTH123
+        sys.path.append(os.path.expanduser('~/.config/protonfixes'))  # noqa: PTH111
 
     # Run fix
     return _run_fix(game_id, default, True)

@@ -17,7 +17,8 @@ def esync_file_limits() -> bool:
     https://github.com/zfigura/wine/blob/esync/README.esync
     """
 
-    with open('/proc/sys/fs/file-max', encoding='ascii') as fsmax:
+    # open is OK here
+    with open('/proc/sys/fs/file-max', encoding='ascii') as fsmax:  # noqa: PTH123
         max_files = fsmax.readline()
         if int(max_files) < 8192:
             log.warn(warning)
