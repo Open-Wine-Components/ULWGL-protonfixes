@@ -1,46 +1,37 @@
 """Load configuration settings for protonfixes"""
 
-import os
-from configparser import ConfigParser
+from config_base import ConfigBase
+from dataclasses import dataclass
+from pathlib import Path
 
-try:
-    from .logger import log
-except ImportError:
-    from logger import log
+class Config(ConfigBase):
+    """Configuration for umu-protonfix"""
 
+    @dataclass
+    class MainSection:
+        """General parameters
+        
+        Attributes:
+            enable_checks (bool): Run checks (`checks.py`) before the fix is executed.
+            enable_global_fixes (bool): Enables included fixes. If deactivated, only local fixes (`~/.config/protonfixes/localfixes`) are executed.
 
-CONF_FILE = '~/.config/protonfixes/config.ini'
-DEFAULT_CONF = """
-[main]
-enable_checks = true
-enable_splash = false
-enable_global_fixes = true
+        """
 
+        enable_checks: bool = True
+        enable_global_fixes: bool = True
 
-[path]
-cache_dir = ~/.cache/protonfixes
-"""
+    @dataclass
+    class PathSection:
+        """Path parameters
 
-CONF = ConfigParser()
-CONF.read_string(DEFAULT_CONF)
+        Attributes:
+            cache_dir (Path): The path that should be used to create temporary and cached files.
 
-try:
-    CONF.read(os.path.expanduser(CONF_FILE))
+        """
 
-except Exception:
-    log.debug('Unable to read config file ' + CONF_FILE)
+        cache_dir: Path = Path.home() / '.cache/protonfixes'
 
+    main: MainSection
+    path: PathSection
 
-def opt_bool(opt: str) -> bool:
-    """Convert bool ini strings to actual boolean values"""
-    return opt.lower() in ['yes', 'y', 'true', '1']
-
-
-locals().update({x: opt_bool(y) for x, y in CONF['main'].items() if 'enable' in x})
-
-locals().update({x: os.path.expanduser(y) for x, y in CONF['path'].items()})
-
-try:
-    [os.makedirs(os.path.expanduser(d)) for n, d in CONF['path'].items()]
-except OSError:
-    pass
+config = Config(Path.home() / '.config/protonfixes/config.ini')

@@ -18,9 +18,11 @@ from collections.abc import Mapping, Generator
 
 try:
     from .logger import log
+    from .config import config
     from .steamhelper import install_app
 except ImportError:
     from logger import log
+    from config import config
     from steamhelper import install_app
 
 try:
@@ -428,8 +430,7 @@ def patch_libcuda() -> bool:
 
     Returns true if the library was patched correctly. Otherwise returns false
     """
-    cache_dir = os.path.expanduser('~/.cache/protonfixes')
-    os.makedirs(cache_dir, exist_ok=True)
+    config.path.cache_dir.mkdir(parents=True, exist_ok=True)
 
     try:
         # Use shutil.which to find ldconfig binary
@@ -472,10 +473,9 @@ def patch_libcuda() -> bool:
 
         log.info(f'Found 64-bit libcuda.so at: {libcuda_path}')
 
-        patched_library = os.path.join(cache_dir, 'libcuda.patched.so')
+        patched_library = config.path.cache_dir / 'libcuda.patched.so'
         try:
-            with open(libcuda_path, 'rb') as f:
-                binary_data = f.read()
+            binary_data = patched_library.read_bytes()
         except OSError as e:
             log.crit(f'Unable to read libcuda.so: {e}')
             return False
@@ -496,11 +496,10 @@ def patch_libcuda() -> bool:
         patched_binary_data = bytes.fromhex(hex_data)
 
         try:
-            with open(patched_library, 'wb') as f:
-                f.write(patched_binary_data)
+            patched_library.write_bytes(patched_binary_data)
 
             # Set permissions to rwxr-xr-x (755)
-            os.chmod(patched_library, 0o755)
+            patched_library.chmod(0o755)
             log.debug(f'Permissions set to rwxr-xr-x for {patched_library}')
         except OSError as e:
             log.crit(f'Unable to write patched libcuda.so to {patched_library}: {e}')
@@ -810,12 +809,12 @@ def install_battleye_runtime() -> None:
 
 def install_all_from_tgz(url: str, path: str = os.getcwd()) -> None:
     """Install all files from a downloaded tar.gz"""
-    cache_dir = os.path.expanduser('~/.cache/protonfixes')
-    os.makedirs(cache_dir, exist_ok=True)
-    tgz_file_name = os.path.basename(url)
-    tgz_file_path = os.path.join(cache_dir, tgz_file_name)
+    config.path.cache_dir.mkdir(parents=True, exist_ok=True)
 
-    if tgz_file_name not in os.listdir(cache_dir):
+    tgz_file_name = os.path.basename(url)
+    tgz_file_path = config.path.cache_dir / tgz_file_name
+
+    if not tgz_file_path.is_file():
         log.info('Downloading ' + tgz_file_name)
         urllib.request.urlretrieve(url, tgz_file_path)
 
@@ -830,12 +829,12 @@ def install_from_zip(url: str, filename: str, path: str = os.getcwd()) -> None:
         log.info(f'File {filename} found in {path}')
         return
 
-    cache_dir = os.path.expanduser('~/.cache/protonfixes')
-    os.makedirs(cache_dir, exist_ok=True)
-    zip_file_name = os.path.basename(url)
-    zip_file_path = os.path.join(cache_dir, zip_file_name)
+    config.path.cache_dir.mkdir(parents=True, exist_ok=True)
 
-    if zip_file_name not in os.listdir(cache_dir):
+    zip_file_name = os.path.basename(url)
+    zip_file_path = config.path.cache_dir / zip_file_name
+
+    if not zip_file_path.is_file():
         log.info(f'Downloading {filename} to {zip_file_path}')
         urllib.request.urlretrieve(url, zip_file_path)
 
