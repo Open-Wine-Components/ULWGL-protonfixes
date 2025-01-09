@@ -19,3 +19,4 @@ exclude = [
 ]
 pythonVersion = "3.9"
 pythonPlatform = "Linux"
+typeCheckingMode = "off"
