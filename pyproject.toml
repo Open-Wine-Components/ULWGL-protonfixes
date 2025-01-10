@@ -19,4 +19,12 @@ exclude = [
 ]
 pythonVersion = "3.9"
 pythonPlatform = "Linux"
+
 typeCheckingMode = "off"
+reportMissingImports = "error"
+reportMissingModuleSource = "error"
+reportUnusedImport = "error"
+reportDuplicateImport = "error"
+reportWildcardImportFromLibrary = "error"
+reportPrivateImportUsage = "error"
+reportShadowedImports = "error"
