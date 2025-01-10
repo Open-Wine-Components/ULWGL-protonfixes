@@ -17,6 +17,7 @@ exclude = [
     "subprojects",
     "verbs"
 ]
+extraPaths = [ ".." ] # Fix "protonfixes" module resolution
 pythonVersion = "3.9"
 pythonPlatform = "Linux"
 
