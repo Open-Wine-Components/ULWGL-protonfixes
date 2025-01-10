@@ -57,20 +57,8 @@ select = [
     "D"
 ]
 ignore = [
-    # Requiring a type for self is deprecated
-    "ANN101",
-    # Ignore starting with 'This'
-    "D404",
-    # Ignore imperative mood
-    "D401",
     # Ignore period endings
-    "D400",
-    # Ignore punctuation
     "D415",
-    # Ignore '1 blank line required before class docstring'
-    "D203",
-    # Ignore 'Multi-line docstring summary should start at the second line'
-    "D213",
     # Ignore 'Missing docstring in public package'
     "D104",
 ]
@@ -82,9 +70,17 @@ unfixable = []
 # Allow unused variables when underscore-prefixed.
 dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
 
+[lint.pydocstyle]
+convention = "google"
+
 [lint.per-file-ignores]
 # Relax docstring-related lint rules for gamefixes
-"gamefixes-*" = ["D103", "D205"]
+"gamefixes-*" = [
+    # Ignore 'Missing docstring in public function'
+    "D103",
+    # Ignore '1 blank line required between summary line and description'
+    "D205"
+]
 
 [format]
 # Like Black, use double quotes for strings.

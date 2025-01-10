@@ -39,7 +39,7 @@ def modify_settings() -> None:
     r.DepthOfFieldQuality=0
     r.LensFlareQuality=0
     """
-    util.set_ini_options(game_opts, path, 'utf-8', 'game')
+    util.set_ini_options(game_opts, path)
 
 
 def clear_logs() -> None:

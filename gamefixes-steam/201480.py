@@ -14,4 +14,4 @@ def main() -> None:
     util.protontricks('dsound')
     util.protontricks('dswave')
     util.protontricks('directplay')
-    util.winedll_override('streamci', 'n')
+    util.winedll_override('streamci', util.DllOverride.NATIVE)

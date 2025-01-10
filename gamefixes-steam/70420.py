@@ -11,7 +11,7 @@ def main() -> None:
     util.protontricks('dmusic')
     util.protontricks('dsound')
     util.protontricks('dswave')
-    util.winedll_override('streamci', 'n')
+    util.winedll_override('streamci', util.DllOverride.NATIVE)
     util.protontricks('sound=alsa')
 
     """ Fix for audio stutter/desync

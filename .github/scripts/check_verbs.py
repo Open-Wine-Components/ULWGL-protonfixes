@@ -4,16 +4,16 @@ import os
 import re
 import subprocess
 
-from glob import iglob
 from pathlib import Path
 from tempfile import mkdtemp
+from collections.abc import Generator
 
 # 'gui' is a virtual verb for opening the Winetricks GUI
 # 'vd=1280x720' is a setting for the virtual desktop and valid
 whitelist_verbs = {'gui', 'vd=1280x720'}
 
 
-def extract_verbs_from_glob(path_glob: iglob) -> set[str]:
+def extract_verbs_from_glob(path_glob: Generator[Path, None, None]) -> set[str]:
     """Simply strip the extension from all found files."""
     return {file.stem for file in path_glob}
 
@@ -48,7 +48,7 @@ def find_valid_verbs(root: Path) -> set[str]:
 
     # Setup environment variables
     env = os.environ.copy()
-    env['TMPDIR'] = tmp_dir
+    env['TMPDIR'] = str(tmp_dir)
     env['WINETRICKS_LATEST_VERSION_CHECK'] = 'disabled'
 
     # Execute winetricks, suppress output
