@@ -1,6 +1,6 @@
 """Ship Graveyard Simulator Prologue"""
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

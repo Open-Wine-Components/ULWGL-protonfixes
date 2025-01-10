@@ -1,6 +1,6 @@
 """Deliver us the Moon fix"""
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

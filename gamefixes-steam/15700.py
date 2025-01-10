@@ -1,6 +1,6 @@
 """Oddworld: Abe's Oddysee"""
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

@@ -1,6 +1,6 @@
 """Game fix for Phantasy Star Online 2"""
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

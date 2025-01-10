@@ -1,6 +1,6 @@
 """Game fix for Tokyo Necro"""
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

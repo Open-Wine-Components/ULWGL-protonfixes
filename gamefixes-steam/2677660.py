@@ -1,6 +1,6 @@
 """Game fix for Indiana Jones and the Great Circle"""
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

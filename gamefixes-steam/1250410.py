@@ -1,6 +1,6 @@
 """Game fix for Flight Simulator 2020"""
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

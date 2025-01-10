@@ -1,6 +1,6 @@
 """Game fix for The Legend of Heroes: Trails in the Sky the 3rd"""
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

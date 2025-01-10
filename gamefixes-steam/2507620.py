@@ -1,6 +1,6 @@
 """Game fix for The Quintessential Quintuplets - Five Memories Spent With You"""
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

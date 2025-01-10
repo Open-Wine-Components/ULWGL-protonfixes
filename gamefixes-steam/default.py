@@ -4,7 +4,7 @@ even if no game fix is present. It is run before game fixes are applied.
 """
 
 import sys
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

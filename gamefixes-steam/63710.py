@@ -1,6 +1,6 @@
 """Game fix for BIT.TRIP RUNNER"""
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

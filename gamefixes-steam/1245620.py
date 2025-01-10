@@ -1,7 +1,7 @@
 """Game fix for Elden Ring: Create the `DLC.bdt` and `DLC.bhd` files to work around the "Inappropriate activity detected" error for players that don't own the DLC"""
 
 from pathlib import Path
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

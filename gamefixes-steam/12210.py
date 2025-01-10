@@ -1,6 +1,6 @@
 """Game fix for GTA IV"""
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

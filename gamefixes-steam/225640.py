@@ -1,6 +1,6 @@
 """Game fix for Sacred 2 Gold"""
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

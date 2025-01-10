@@ -1,6 +1,6 @@
 """Game fix Dark Souls Remastered"""
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

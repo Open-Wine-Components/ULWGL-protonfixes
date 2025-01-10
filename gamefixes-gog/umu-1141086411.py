@@ -1,6 +1,6 @@
 """Silent Hill 4: The Room"""
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

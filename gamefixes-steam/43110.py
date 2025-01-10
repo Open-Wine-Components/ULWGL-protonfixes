@@ -1,6 +1,6 @@
 """Game fix for Metro 2033"""
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

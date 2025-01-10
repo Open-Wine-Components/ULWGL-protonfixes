@@ -1,6 +1,6 @@
 """Game fix for From Dust"""
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

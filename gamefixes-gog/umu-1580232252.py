@@ -1,6 +1,6 @@
 """Resident Evil (1997)"""
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

@@ -1,8 +1,7 @@
 """METAL GEAR SOLID 2 SUBSTANCE"""
 # GOG-ID 2069117974
 
-from protonfixes import util
-
+from .. import util
 
 def main() -> None:
     util.protontricks('dsound')

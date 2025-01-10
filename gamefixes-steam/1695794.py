@@ -1,6 +1,6 @@
 """Game fix Halo 3: ODST mod tools"""
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

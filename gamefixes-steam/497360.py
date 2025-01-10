@@ -8,7 +8,7 @@ Widescreen supported (16:9/21:9, 32:9 not tested)
 
 import os
 import subprocess
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

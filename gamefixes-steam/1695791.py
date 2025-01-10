@@ -1,6 +1,6 @@
 """Game fix for Halo 3 mod tools"""
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

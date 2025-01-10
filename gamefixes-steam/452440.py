@@ -11,8 +11,8 @@ from hashlib import sha256
 from subprocess import run
 
 import __main__ as protonmain
-from protonfixes import util
-from protonfixes.logger import log
+from .. import util
+from ..logger import log
 
 
 def main() -> None:

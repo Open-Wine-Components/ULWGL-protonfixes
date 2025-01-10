@@ -1,6 +1,6 @@
 """Game fix for Fall Guys"""
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

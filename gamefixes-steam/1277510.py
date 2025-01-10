@@ -1,6 +1,6 @@
 """Game fix for Re:ZERO -Starting Life in Another World- The Prophecy of the Throne"""
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

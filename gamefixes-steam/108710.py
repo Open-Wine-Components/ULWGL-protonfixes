@@ -1,6 +1,6 @@
 """Alan Wake"""
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

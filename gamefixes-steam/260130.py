@@ -1,6 +1,6 @@
 """Game fix for Agarest Zero"""
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

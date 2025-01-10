@@ -1,6 +1,6 @@
 """Game fix for Oddworld: Munch's Oddysee"""
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

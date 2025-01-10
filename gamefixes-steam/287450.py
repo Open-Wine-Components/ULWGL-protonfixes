@@ -2,7 +2,7 @@
 Source: https://github.com/simons-public/protonfixes/issues/24#issue-372384148
 """
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

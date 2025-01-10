@@ -2,7 +2,7 @@
 Proton issue: https://github.com/ValveSoftware/Proton/issues/6645
 """
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

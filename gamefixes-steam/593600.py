@@ -1,6 +1,6 @@
 """Game fix for PixARK"""
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

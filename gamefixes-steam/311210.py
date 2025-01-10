@@ -1,6 +1,6 @@
 """Game fix for Black Ops III"""
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

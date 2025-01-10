@@ -1,6 +1,6 @@
 """Game fix for Guilty Gear Accent Core Plus R"""
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

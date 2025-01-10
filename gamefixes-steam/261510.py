@@ -1,6 +1,6 @@
 """Game fix for Tesla Effect"""
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

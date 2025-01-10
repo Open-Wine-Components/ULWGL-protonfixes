@@ -2,7 +2,7 @@
 Launcher crashes immediately without displaying any windows
 """
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

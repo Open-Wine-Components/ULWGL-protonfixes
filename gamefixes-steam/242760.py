@@ -1,6 +1,6 @@
 """Game fix for The Forest"""
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

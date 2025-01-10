@@ -1,6 +1,6 @@
 """Game fix Catherine Classic"""
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

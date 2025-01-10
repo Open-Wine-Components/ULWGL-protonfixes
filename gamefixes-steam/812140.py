@@ -1,6 +1,6 @@
 """Assassin's Creed: Odyssey"""
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

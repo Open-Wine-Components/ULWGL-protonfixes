@@ -1,6 +1,6 @@
 """Tom Clancy's Ghost Recon Breakpoint"""
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

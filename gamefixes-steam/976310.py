@@ -1,6 +1,6 @@
 """Game fix Mortal Kombat 11"""
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

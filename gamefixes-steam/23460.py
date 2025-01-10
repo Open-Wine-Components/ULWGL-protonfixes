@@ -5,7 +5,7 @@ Videos still don't work.
 
 import os
 import subprocess
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

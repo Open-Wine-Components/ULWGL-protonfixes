@@ -1,6 +1,6 @@
 """Game fix for Café Stella and the Reaper's Butterflies"""
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

@@ -1,6 +1,6 @@
 """Shadow of the Tomb Raider"""
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

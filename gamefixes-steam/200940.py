@@ -1,6 +1,6 @@
 """Game fix for Sonic CD"""
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

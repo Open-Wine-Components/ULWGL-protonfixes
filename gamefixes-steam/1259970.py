@@ -1,6 +1,6 @@
 """Game fix for Pes 2021"""
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

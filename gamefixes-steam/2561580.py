@@ -2,7 +2,7 @@
 
 from sys import argv
 from os import environ
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

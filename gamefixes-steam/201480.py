@@ -1,6 +1,6 @@
 """Game fix for Serious Sam: The Random Encounter"""
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

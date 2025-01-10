@@ -3,7 +3,7 @@ Standalone and Sapien seem to work just fine without d3dcompiler_47 and msxml3, 
 - Oro, @orowith2os
 """
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

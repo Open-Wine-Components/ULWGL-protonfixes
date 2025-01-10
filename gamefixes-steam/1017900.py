@@ -1,6 +1,6 @@
 """Game fix for Age of Empires: DE"""
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

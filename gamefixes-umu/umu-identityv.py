@@ -1,6 +1,6 @@
 """Game fix for Identity V"""
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

@@ -1,6 +1,6 @@
 """Yu-Gi-Oh Duel Links needs vcrun2019"""
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

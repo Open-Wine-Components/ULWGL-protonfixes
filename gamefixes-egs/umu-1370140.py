@@ -1,6 +1,6 @@
 """Game fix Kao the Kangaroo (2022)"""
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

@@ -1,6 +1,6 @@
 """Game fix for Agarest: Generations of War 2"""
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

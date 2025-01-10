@@ -4,17 +4,13 @@ import os
 import re
 import sys
 import csv
+
 from functools import lru_cache
 from importlib import import_module
 
-try:
-    from . import config
-    from .checks import run_checks
-    from .logger import log
-except ImportError:
-    import config
-    from checks import run_checks
-    from logger import log
+from . import config
+from .checks import run_checks
+from .logger import log
 
 try:
     import __main__ as protonmain

@@ -1,6 +1,6 @@
 """Call Winetricks GUI"""
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

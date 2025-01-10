@@ -1,6 +1,6 @@
 """Game fix for Chantelise - A Tale of Two Sisters"""
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

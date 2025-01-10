@@ -1,6 +1,6 @@
 """Game fix for Mafia II Definitive Edition"""
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

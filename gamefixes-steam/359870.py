@@ -1,7 +1,7 @@
 """Game fix for FFX/X-2 HD Remaster"""
 
 import os
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

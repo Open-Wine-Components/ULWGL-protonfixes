@@ -1,6 +1,6 @@
 """Teenage Mutant Ninja Turtles Shredders Revenge"""
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

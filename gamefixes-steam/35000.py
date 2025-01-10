@@ -1,6 +1,6 @@
 """Game fix for Mini Ninjas"""
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

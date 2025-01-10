@@ -1,6 +1,6 @@
 """Alien Breed 3: Descent"""
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

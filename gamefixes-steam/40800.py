@@ -1,7 +1,6 @@
 """Game fix for Super Meat Boy"""
 
-#
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

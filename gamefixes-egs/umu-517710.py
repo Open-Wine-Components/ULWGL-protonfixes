@@ -1,6 +1,6 @@
 """Game fix Redout: Enhanced Edition"""
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

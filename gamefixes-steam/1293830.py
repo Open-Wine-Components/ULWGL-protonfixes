@@ -1,6 +1,6 @@
 """Forza Horizon 4"""
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

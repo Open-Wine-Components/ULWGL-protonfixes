@@ -1,6 +1,6 @@
 """Game fix for CYGNI: All Guns Blazing"""
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

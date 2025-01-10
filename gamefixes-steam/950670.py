@@ -1,8 +1,8 @@
 """Game fix for Gothic Playable Teaser"""
 
 from pathlib import Path
-from protonfixes import util
-from protonfixes.logger import log
+from .. import util
+from ..logger import log
 
 
 def main() -> None:

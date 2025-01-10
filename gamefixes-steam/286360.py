@@ -3,7 +3,7 @@ Launcher keeps it's process running in the background but nothing shows up
 """
 
 import os
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

@@ -1,6 +1,6 @@
 """Game fix for YOU and ME and HER: A Love Story"""
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

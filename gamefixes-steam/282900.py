@@ -2,7 +2,7 @@
 Poor performance on some AMD hardware
 """
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

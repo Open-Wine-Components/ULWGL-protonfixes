@@ -1,8 +1,8 @@
 """Game fix for Ghostbusters: The Video Game Remastered (2019)"""
 
 from pathlib import Path
-from protonfixes import util
-from protonfixes.logger import log
+from .. import util
+from ..logger import log
 
 
 def main() -> None:

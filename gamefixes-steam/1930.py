@@ -2,7 +2,7 @@
 https://www.protondb.com/app/1930
 """
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

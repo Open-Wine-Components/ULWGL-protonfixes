@@ -1,6 +1,6 @@
 """Game fix for Naruto To Boruto"""
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

@@ -1,6 +1,6 @@
 """Game fix for Tomb Raider I"""
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

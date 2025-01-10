@@ -1,6 +1,6 @@
 """Just Cause 2"""
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

@@ -46,6 +46,10 @@ jobs:
           ln -s umu-protonfixes protonfixes
           cd protonfixes
           python3 .github/scripts/check_imports.py
+      # We need a known parent package in the unit tests, so we need to change to the parent dir
+      # As "umu-protonfixes" is not a valid package name, we create a symbolic link to "protonfixes"
       - name: Test with unittest
         run: |
-          python3 protonfixes_test.py
+          cd ..
+          ln -s umu-protonfixes protonfixes
+          python3 -m protonfixes.protonfixes_test

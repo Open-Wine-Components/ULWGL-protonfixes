@@ -1,7 +1,7 @@
 """Game fix for Crashday Redline Edition"""
 
 import json
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

@@ -1,6 +1,6 @@
 """Game fix for BioShock 2 Remastered"""
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

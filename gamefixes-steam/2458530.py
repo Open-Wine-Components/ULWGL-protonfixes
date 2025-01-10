@@ -1,6 +1,6 @@
 """Game fix for Sanoba Witch FHD Edition"""
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

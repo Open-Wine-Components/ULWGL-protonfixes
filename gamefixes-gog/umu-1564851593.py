@@ -10,8 +10,8 @@ from tempfile import mkdtemp
 from urllib.request import urlopen
 from zipfile import ZipFile, is_zipfile
 
-from protonfixes import util
-from protonfixes.logger import log
+from .. import util
+from ..logger import log
 
 # Archive containing the text injecting framework
 arc = 'https://github.com/user-attachments/files/16136393/d3d9-2206220222.zip'

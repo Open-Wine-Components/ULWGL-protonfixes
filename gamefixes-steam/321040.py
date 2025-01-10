@@ -1,6 +1,6 @@
 """Game fix for Dirt 3 Complete Edition"""
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

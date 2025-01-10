@@ -1,6 +1,6 @@
 """Game fix for Call of Juarez: Gunslinger"""
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

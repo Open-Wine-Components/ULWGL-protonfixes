@@ -1,7 +1,7 @@
 """Game fix for Putt-Putt: Pep's Birthday Surprise"""
 
 import os
-from protonfixes import util
+from .. import util
 
 
 # Putt-Putt: PBS doesn't run unless there is a CD-ROM drive attached.

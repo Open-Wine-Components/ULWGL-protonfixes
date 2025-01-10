@@ -1,6 +1,6 @@
 """Game fix Shadow of War"""
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

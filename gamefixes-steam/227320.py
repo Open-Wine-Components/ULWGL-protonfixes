@@ -1,6 +1,6 @@
 """Game fix for You Need a Budget 4"""
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

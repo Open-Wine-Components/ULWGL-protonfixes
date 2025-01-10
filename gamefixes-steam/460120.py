@@ -1,7 +1,6 @@
 """Game fix for Megadimension Neptunia VII"""
 
-#
-from protonfixes import util
+from .. import util
 
 
 # Fixes cinematics not showing or spawning in a different window

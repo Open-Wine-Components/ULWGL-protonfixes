@@ -1,6 +1,6 @@
 """Game fix Hogwarts Legacy"""
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

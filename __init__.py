@@ -1,18 +1,42 @@
-"""Starts the protonfix module"""
+"""Starts the protonfix module and runs fixes after pre-flight-checks"""
 
 import os
 import sys
+import traceback
 
-RUN_CONDITIONS = [
-    'STEAM_COMPAT_DATA_PATH' in os.environ,
-    'PROTONFIXES_DISABLE' not in os.environ,
-    'waitforexitandrun' in sys.argv[1],
-]
+from . import fix
+from .logger import log
 
-if all(RUN_CONDITIONS):
-    import traceback
-    from . import fix
 
+def check_conditions() -> bool:
+    """Determine, if the actual game was executed and protonfixes isn't deactivated.
+
+    Returns:
+        bool: True, if the fix should be executed.
+
+    """    
+    return len(sys.argv) >= 1 and \
+        'STEAM_COMPAT_DATA_PATH' in os.environ and \
+        'PROTONFIXES_DISABLE' not in os.environ and \
+        'waitforexitandrun' in sys.argv[1]
+
+
+def check_iscriptevaluator() -> bool:
+    """Determine, if we were invoked while running "iscriptevaluator.exe".
+
+    Returns:
+        bool: True, if we were invoked while running "iscriptevaluator.exe".
+
+    """    
+    return len(sys.argv) >= 2 and \
+        'iscriptevaluator.exe' in sys.argv[2]
+
+
+if check_iscriptevaluator():
+    log.debug('Skipping fix execution. We are running "iscriptevaluator.exe".')
+elif not check_conditions():
+    log.warn('Skipping fix execution. We are probably running an unit test.')
+else:
     try:
         fix.main()
 

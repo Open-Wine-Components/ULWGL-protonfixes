@@ -6,7 +6,7 @@ edit registry to avoid ffdshow compatibility manager popup
 
 import os
 import subprocess
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

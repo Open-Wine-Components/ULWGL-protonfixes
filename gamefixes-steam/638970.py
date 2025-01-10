@@ -1,6 +1,6 @@
 """Game fix for Yakuza 0"""
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

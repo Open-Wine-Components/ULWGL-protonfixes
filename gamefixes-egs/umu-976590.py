@@ -1,6 +1,6 @@
 """Game fix for Bus Simulator 21 Next Stop"""
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

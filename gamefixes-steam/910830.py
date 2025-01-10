@@ -1,6 +1,6 @@
 """Game fix for Rebel Galaxy Outlaw"""
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

@@ -3,7 +3,7 @@ wmp11 (Fixes missing logo videos and problems with working videos)
 hangs on logo without override
 """
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

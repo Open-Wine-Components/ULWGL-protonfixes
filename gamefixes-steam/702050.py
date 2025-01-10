@@ -1,6 +1,6 @@
 """Game fix for The Song of Saya"""
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

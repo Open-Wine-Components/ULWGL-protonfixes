@@ -3,8 +3,8 @@
 import os
 import shutil
 
-from protonfixes import util
-from protonfixes.logger import log
+from .. import util
+from ..logger import log
 
 
 def main() -> None:

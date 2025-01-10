@@ -1,6 +1,6 @@
 """Game fix for Watch_Dogs 2"""
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

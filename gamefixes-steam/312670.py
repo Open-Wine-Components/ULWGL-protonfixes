@@ -1,6 +1,6 @@
 """Game fix for Strange Brigade"""
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

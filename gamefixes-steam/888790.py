@@ -1,6 +1,6 @@
 """Game fix for Sabbat of the Witch"""
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

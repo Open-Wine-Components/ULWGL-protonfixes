@@ -1,6 +1,6 @@
 """Madden NFL 21 needs vcrun2019 for online mode to work"""
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

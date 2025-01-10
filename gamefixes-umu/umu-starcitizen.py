@@ -1,6 +1,6 @@
 """Game fix for Star Citizen"""
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

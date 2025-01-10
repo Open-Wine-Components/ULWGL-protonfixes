@@ -1,6 +1,6 @@
 """Game fix for Star Trek Online launcher"""
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

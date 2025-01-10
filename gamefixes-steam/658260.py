@@ -2,7 +2,7 @@
 Missing voices/sounds in cutscenes
 """
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

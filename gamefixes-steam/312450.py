@@ -2,7 +2,7 @@
 Still missing intro video codecs
 """
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

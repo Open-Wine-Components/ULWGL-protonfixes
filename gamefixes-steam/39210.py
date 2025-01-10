@@ -1,7 +1,7 @@
 """Game fix for FFXIV"""
 
 import os
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

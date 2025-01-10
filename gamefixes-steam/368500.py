@@ -1,6 +1,6 @@
 """Game fix for Assassin's Creed: Syndicate"""
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

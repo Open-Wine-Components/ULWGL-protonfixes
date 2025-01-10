@@ -1,6 +1,6 @@
 """Game fix for STAR WARS Galactic Battlegrounds Saga"""
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

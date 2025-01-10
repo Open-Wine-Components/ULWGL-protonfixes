@@ -3,7 +3,7 @@
 import os
 import subprocess
 import glob
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

@@ -1,6 +1,6 @@
 """Game fix for FINAL FANTASY IX"""
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

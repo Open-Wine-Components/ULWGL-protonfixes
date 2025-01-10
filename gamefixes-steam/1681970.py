@@ -1,6 +1,6 @@
 """神都不良探 Underdog Detective"""
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

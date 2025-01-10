@@ -1,6 +1,6 @@
 """Game fix for Yesterday Origins"""
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

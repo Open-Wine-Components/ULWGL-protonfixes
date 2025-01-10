@@ -1,6 +1,6 @@
 """Game fix for LEGO Batman 2: DC Super Heroes"""
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

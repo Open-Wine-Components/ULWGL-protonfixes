@@ -1,6 +1,6 @@
 """Game fix for The Evil Within(268050)"""
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

@@ -1,6 +1,6 @@
 """The Hunter: Call of the Wild"""
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

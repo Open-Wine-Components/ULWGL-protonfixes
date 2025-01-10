@@ -1,6 +1,6 @@
 """Game fix for Batman Arkham Knight"""
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

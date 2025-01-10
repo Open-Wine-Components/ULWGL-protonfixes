@@ -1,7 +1,6 @@
 """Game fix for Outlaws + A Handful of Missions"""
 
-#
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

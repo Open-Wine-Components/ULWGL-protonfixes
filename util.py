@@ -1,7 +1,6 @@
 """Utilities to make gamefixes easier"""
 
 import configparser
-from io import TextIOWrapper
 import os
 import sys
 import re
@@ -12,16 +11,14 @@ import zipfile
 import subprocess
 import urllib.request
 import functools
+
+from io import TextIOWrapper
 from socket import socket, AF_INET, SOCK_DGRAM
 from typing import Literal, Any, Callable, Union
 from collections.abc import Mapping, Generator
 
-try:
-    from .logger import log
-    from .steamhelper import install_app
-except ImportError:
-    from logger import log
-    from steamhelper import install_app
+from .logger import log
+from .steamhelper import install_app
 
 try:
     import __main__ as protonmain

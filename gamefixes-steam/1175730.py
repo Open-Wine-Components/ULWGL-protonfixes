@@ -1,6 +1,6 @@
 """Game fix Tree Of Savior"""
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

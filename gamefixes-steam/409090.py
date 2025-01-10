@@ -8,7 +8,7 @@ copy dgvoodoo2 d3d9.dll every time otherwise it gets overwritten
 import os
 import subprocess
 import shutil
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

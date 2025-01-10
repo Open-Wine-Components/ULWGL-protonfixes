@@ -2,7 +2,7 @@
 dgvoodoo2 to force anti-aliasing and higher resolution
 """
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

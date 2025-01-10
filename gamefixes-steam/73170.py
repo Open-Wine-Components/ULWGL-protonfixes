@@ -1,6 +1,6 @@
 """Game fix for Darkest Hour: A Hearts of Iron Game"""
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

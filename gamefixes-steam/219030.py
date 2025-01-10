@@ -1,6 +1,6 @@
 """Game fix for Ys Origin Demo"""
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

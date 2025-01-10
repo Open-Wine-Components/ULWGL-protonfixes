@@ -1,6 +1,6 @@
 """Game fix for Conception PLUS: Maidens of the Twelve Stars"""
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

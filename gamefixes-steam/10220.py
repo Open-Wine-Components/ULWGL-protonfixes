@@ -1,6 +1,6 @@
 """Postal III"""
 
-from protonfixes import util
+from .. import util
 
 
 # Missing fonts for console and various UI

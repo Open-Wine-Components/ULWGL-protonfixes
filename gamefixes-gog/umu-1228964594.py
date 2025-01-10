@@ -1,6 +1,6 @@
 """Game fix for Soldier of Fortune II: Double Helix - Gold Edition"""
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

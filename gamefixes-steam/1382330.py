@@ -4,7 +4,7 @@ Requires disabling the gstreamer protonaudioconverterbin plugin to get full audi
 fixed by Swish in Protondb
 """
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

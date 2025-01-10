@@ -1,6 +1,6 @@
 """Oddworld: Stranger's Wrath HD"""
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

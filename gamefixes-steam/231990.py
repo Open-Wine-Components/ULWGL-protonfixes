@@ -1,7 +1,6 @@
 """Game fix for Spider-Man: Shattered Dimensions"""
 
-#
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

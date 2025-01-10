@@ -1,6 +1,6 @@
 """Game fix for Dusty Revenge: Co-Op Edition"""
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

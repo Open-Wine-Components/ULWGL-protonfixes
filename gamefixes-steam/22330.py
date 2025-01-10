@@ -12,7 +12,7 @@
 import os
 
 from dataclasses import dataclass
-from protonfixes import util
+from .. import util
 
 
 def main_with_id(game_id: str) -> None:

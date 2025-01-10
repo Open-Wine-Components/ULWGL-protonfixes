@@ -1,6 +1,6 @@
 """Outrun 2006: Coast 2 Coast"""
 
-from protonfixes import util
+from .. import util
 
 
 # Fix water rendering as black

@@ -2,7 +2,7 @@
 Will not launch without SteamDeck=1
 """
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

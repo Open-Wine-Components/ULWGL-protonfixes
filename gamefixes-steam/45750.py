@@ -4,7 +4,7 @@ This game requires two fixes to work:
 2. No more than 12 CPU cores (on PCGamingWiki is described as 6, but on my personal test I was able to set until 12 of 16) [source: https://www.pcgamingwiki.com/wiki/Lost_Planet_2#Alternate_solution_for_high_core_CPUs]
 """
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

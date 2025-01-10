@@ -3,7 +3,7 @@ Missing sound in bonus content videos
 Requires disabling the gstreamer protonaudioconverterbin to get full audio
 """
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

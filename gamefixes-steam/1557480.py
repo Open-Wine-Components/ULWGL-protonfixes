@@ -1,6 +1,6 @@
 """Project MIKHAIL: A Muv-Luv War Story"""
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

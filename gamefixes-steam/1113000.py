@@ -1,6 +1,6 @@
 """Game fix for Persona 4 Golden"""
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

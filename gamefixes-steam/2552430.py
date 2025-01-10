@@ -1,6 +1,6 @@
 """Game fix for KINGDOM HEARTS -HD 1.5+2.5 ReMIX-"""
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

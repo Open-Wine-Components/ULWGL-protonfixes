@@ -1,7 +1,6 @@
 """Game fix Dungeons & Dragons Online"""
 
-#
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

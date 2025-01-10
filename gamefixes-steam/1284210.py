@@ -1,7 +1,7 @@
 """Game fix for Guild Wars 2"""
 
 import os
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

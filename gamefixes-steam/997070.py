@@ -1,6 +1,6 @@
 """Game fix Marvel's Avengers"""
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

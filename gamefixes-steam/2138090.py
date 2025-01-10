@@ -5,7 +5,7 @@ fixed by Swish in Protondb
 further stolen from marianoag by bitwolf
 """
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

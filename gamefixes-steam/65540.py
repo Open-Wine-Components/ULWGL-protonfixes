@@ -2,7 +2,7 @@
 Game fix for Gothic II: Gold Classic
 """
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:

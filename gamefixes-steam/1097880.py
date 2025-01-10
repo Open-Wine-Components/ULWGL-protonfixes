@@ -1,6 +1,6 @@
 """Game fix for Super Naughty Maid 2"""
 
-from protonfixes import util
+from .. import util
 
 
 def main() -> None:
