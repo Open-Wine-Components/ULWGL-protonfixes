@@ -1,32 +1,18 @@
 """Game fix for Smite"""
 
-import glob
-import os
-import subprocess
 from protonfixes import util
 
 
 def main() -> None:
-    """Fix EAC location in smite"""
-    install_dir = glob.escape(util.get_game_install_path())
+    """Fix incorrect EAC locations in smite"""
+    install_dir = util.get_game_install_path()
+    eac_file_x64 = install_dir / 'Win64/EasyAntiCheat/easyanticheat_x64.so'
+    eac_file_x86 = install_dir / 'Win32/EasyAntiCheat/easyanticheat_x86.so'
 
-    # Fix EAC incorrect location:
-    if not os.path.exists(install_dir + '/Win64/EasyAntiCheat/easyanticheat_x64.so'):
-        subprocess.call(
-            [
-                'ln',
-                '-s',
-                install_dir + '/EasyAntiCheat/easyanticheat_x64.so',
-                install_dir + '/Win64/EasyAntiCheat/',
-            ]
-        )
+    # x64
+    if not eac_file_x64.exists():
+        eac_file_x64.symlink_to(install_dir / 'EasyAntiCheat/easyanticheat_x64.so')
 
-    if not os.path.exists(install_dir + '/Win32/EasyAntiCheat/easyanticheat_x86.so'):
-        subprocess.call(
-            [
-                'ln',
-                '-s',
-                install_dir + '/EasyAntiCheat/easyanticheat_x86.so',
-                install_dir + '/Win32/EasyAntiCheat/',
-            ]
-        )
+    # x86
+    if not eac_file_x86.exists():
+        eac_file_x86.symlink_to(install_dir / 'EasyAntiCheat/easyanticheat_x86.so')

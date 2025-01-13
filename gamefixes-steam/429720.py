@@ -1,7 +1,8 @@
 """Game fix for IMSCARED"""
 
-import os
-import getpass
+import shutil
+
+from pathlib import Path
 from protonfixes import util
 
 
@@ -9,11 +10,12 @@ def main() -> None:
     # IMSCARED relies on a folder on the user's Desktop being accessible
     # The problem is that all of the folders in Proton are sandboxed
     # So this protonfix works around that
-    desktoppath = os.path.join(util.protonprefix(), 'drive_c/users/steamuser/Desktop')
-    if os.path.exists(desktoppath):
-        if os.path.islink(desktoppath):
-            os.unlink(desktoppath)
-        else:
-            os.rmdir(desktoppath)
-    dst = '/home/' + getpass.getuser() + '/Desktop/'
-    os.symlink(dst, desktoppath)
+    desktop_path = util.protonprefix() / 'drive_c/users/steamuser/Desktop'
+
+    if desktop_path.is_symlink():
+        desktop_path.unlink()
+    elif desktop_path.is_dir():
+        shutil.rmtree(desktop_path)
+
+    target = Path.home() / 'Desktop'
+    desktop_path.symlink_to(target)

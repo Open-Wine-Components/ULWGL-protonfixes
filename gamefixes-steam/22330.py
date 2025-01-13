@@ -11,7 +11,6 @@
 
 import os
 
-from dataclasses import dataclass
 from protonfixes import util
 
 
@@ -23,19 +22,11 @@ def main_with_id(game_id: str) -> None:
 
     # Run script extender if it exists.
     mapping = get_redirect_name(game_id)
-    if os.path.isfile(mapping.to_name):
-        util.replace_command(mapping.from_name, mapping.to_name)
+    if os.path.isfile(mapping.to_value):
+        util.replace_command(mapping.from_value, mapping.to_value)
 
 
-@dataclass
-class Redirect:
-    """Used for replacements"""
-
-    from_name: str
-    to_name: str
-
-
-def get_redirect_name(game_id: str) -> Redirect:
+def get_redirect_name(game_id: str) -> util.ReplaceType:
     """Mapping for SteamID -> script extender replacements"""
     mapping = {
         '22380': ('FalloutNV.exe', 'nvse_loader.exe'),  # Fallout New Vegas
@@ -46,4 +37,4 @@ def get_redirect_name(game_id: str) -> Redirect:
         '489830': ('SkyrimSELauncher.exe', 'skse64_loader.exe'),  # Skyrim SE
         '1716740': ('Starfield.exe', 'sfse_loader.exe'),  # Starfield
     }.get(game_id, ('', ''))
-    return Redirect(*mapping)
+    return util.ReplaceType(*mapping)

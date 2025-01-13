@@ -1,33 +1,29 @@
-"""Gobliiins 5
+"""Gobliiins 5 (and Demo - 2505910)
 Setup doesn't work and language is default to french
 """
 
-import os
-import sys
-import subprocess
-import glob
 from protonfixes import util
 
 
-def main() -> None:
-    if sys.argv[2].find('winsetup') != -1:
-        os.chdir(sys.argv[2][-29:-13])
+def main_with_id(game_id: str) -> None:
+    """The game consists of 4 parts, that are located in their own folder
+    They each have a separate config, that needs to be patched
 
-    install_dir = glob.escape(util.get_game_install_path())
-    with open(
-        os.path.join(install_dir, 'Gobliiins5-Part4/acsetup.cfg'), encoding='utf-8'
-    ) as f:
-        if 'Linear' not in f.read():
-            for i in range(1, 5):
-                subprocess.call(
-                    [
-                        f"sed -i 's/filter=stdscale/filter=Linear/' {install_dir}/Gobliiins5-Part{i}/acsetup.cfg"
-                    ],
-                    shell=True,
-                )
-                subprocess.call(
-                    [
-                        f"sed -i 's/translation.*/translation=English/' {install_dir}/Gobliiins5-Part{i}/acsetup.cfg"
-                    ],
-                    shell=True,
-                )
+    The demo launches from it's install directory and doesn't need a subfolder
+    """
+    cfg_str = """
+    [language]
+    translation=English
+
+    [graphics]
+    filter=Linear
+    """
+
+    # Demo
+    if game_id == '2505910':
+        util.set_ini_options(cfg_str, 'acsetup.cfg', 'utf-8', 'game')#
+        return
+
+    # Full
+    for i in range(1, 5):
+        util.set_ini_options(cfg_str, f'Gobliiins5-Part{i}/acsetup.cfg', 'utf-8', 'game')

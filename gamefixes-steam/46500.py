@@ -1,12 +1,12 @@
 """Game fix for Syberia"""
 
-import os
-import subprocess
+from pathlib import Path
 
 
 def main() -> None:
     """Needs player.ini to prevent black screen on load"""
-    if not os.path.isfile('player.ini'):
-        subprocess.call(['touch', 'player.ini'])
-        with open('player.ini', 'w+', encoding='utf-8') as f:
-            f.write('800 600 32 0 BaseCMO.cmo')
+    ini_file = Path('player.ini')
+    if ini_file.is_file():
+        return
+    
+    ini_file.write_text('800 600 32 0 BaseCMO.cmo', 'utf-8')

@@ -1,6 +1,5 @@
 """Game fix for Fable III"""
 
-import os
 import shutil
 
 from protonfixes import util
@@ -12,15 +11,15 @@ def main() -> None:
     util.protontricks('xliveless')
 
     # Remove Windows Live folder
-    dirpath = os.path.join(
-        util.protonprefix(),
-        'drive_c',
-        'Program Files',
-        'Common Files',
-        'Microsoft Shared',
-        'Windows Live',
+    dirpath = (
+        util.protonprefix() /
+        'drive_c'
+        'Program Files'
+        'Common Files'
+        'Microsoft Shared'
+        'Windows Live'
     )
-    if os.path.exists(dirpath):
+    if dirpath.is_dir():
         shutil.rmtree(dirpath)
     else:
-        log(f"Path '{dirpath}' could not be found")
+        log.info(f"Path '{dirpath}' could not be found")

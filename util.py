@@ -1,7 +1,6 @@
 """Utilities to make gamefixes easier"""
 
 import configparser
-from io import TextIOWrapper
 import os
 import sys
 import re
@@ -12,9 +11,14 @@ import zipfile
 import subprocess
 import urllib.request
 import functools
+
+from enum import Enum
+from pathlib import Path
+from dataclasses import dataclass
+from datetime import datetime, timezone
 from socket import socket, AF_INET, SOCK_DGRAM
-from typing import Literal, Any, Callable, Union
-from collections.abc import Mapping, Generator
+from typing import Literal, Any, Union, Optional
+from collections.abc import Mapping, Callable
 
 try:
     from .logger import log
@@ -29,6 +33,83 @@ except ImportError:
     log.warn('Unable to hook into Proton main script environment')
 
 
+# TypeAliases
+StrPath = Union[str, Path]
+
+
+# Enums
+class DosDevice(Enum):
+    """Enum for dos device types (mounted at 'prefix/dosdevices/')
+    
+    Attributes:
+        NETWORK: A network device (UNC)
+        FLOPPY: A floppy drive
+        CD_ROM: A CD ROM drive
+        HD: A hard disk drive
+
+    """
+
+    NETWORK = 'network'
+    FLOPPY = 'floppy'
+    CD_ROM = 'cdrom'
+    HD = 'hd'
+
+
+# Helper classes
+@dataclass
+class ReplaceType:
+    """Used for replacements"""
+
+    from_value: str
+    to_value: str
+
+
+class ProtonVersion:
+    """Parses the proton version and build timestamp"""
+
+    def __init__(self, version_string: str) -> None:
+        """Initialize from a given version string"""
+        # Example string '1722141596 GE-Proton9-10-18-g3763cd3a\n'
+        parts = version_string.split()
+        if len(parts) != 2 or not parts[0].isnumeric():
+            log.crit(f'Version string "{version_string}" is invalid!')
+            return
+        self.build_date: datetime = datetime.fromtimestamp(int(parts[0]), tz=timezone.utc)
+        self.version_name: str = parts[1]
+
+
+# Functions
+@functools.lru_cache
+def protondir() -> Path:
+    """Returns the path to proton"""
+    return Path(sys.argv[0]).parent
+
+
+@functools.lru_cache
+def protonprefix() -> Path:
+    """Returns wineprefix's path used by proton"""
+    return Path(os.environ.get('STEAM_COMPAT_DATA_PATH', '')) / 'pfx'
+
+
+@functools.lru_cache
+def get_path_syswow64() -> Path:
+    """Returns the syswow64's path in the prefix"""
+    return protonprefix() / 'drive_c/windows/syswow64'
+
+
+@functools.lru_cache
+def proton_version() -> ProtonVersion:
+    """Returns the version of proton"""
+    fullpath = protondir() / 'version'
+    try:
+        version_string = fullpath.read_text(encoding='ascii')
+        return ProtonVersion(version_string)
+    except OSError:
+        log.warn(f'Proton version file not found in: {fullpath}')
+        return ProtonVersion('0 Unknown')
+
+
+@functools.lru_cache
 def which(appname: str) -> Union[str, None]:
     """Returns the full path of an executable in $PATH"""
     for path in os.environ['PATH'].split(os.pathsep):
@@ -37,47 +118,6 @@ def which(appname: str) -> Union[str, None]:
             return fullpath
     log.warn(str(appname) + 'not found in $PATH')
     return None
-
-
-def protondir() -> str:
-    """Returns the path to proton"""
-    proton_dir = os.path.dirname(sys.argv[0])
-    return proton_dir
-
-
-def protonprefix() -> str:
-    """Returns the wineprefix used by proton"""
-    return os.path.join(os.environ['STEAM_COMPAT_DATA_PATH'], 'pfx/')
-
-
-def protonnameversion() -> Union[str, None]:
-    """Returns the version of proton from sys.argv[0]"""
-    version = re.search('Proton ([0-9]*\\.[0-9]*)', sys.argv[0])
-    if version:
-        return version.group(1)
-    log.warn('Proton version not parsed from command line')
-    return None
-
-
-def protontimeversion() -> int:
-    """Returns the version timestamp of proton from the `version` file"""
-    fullpath = os.path.join(protondir(), 'version')
-    try:
-        with open(fullpath, encoding='ascii') as version:
-            for timestamp in version.readlines():
-                return int(timestamp.strip())
-    except OSError:
-        log.warn('Proton version file not found in: ' + fullpath)
-        return 0
-    log.warn('Proton version not parsed from file: ' + fullpath)
-    return 0
-
-
-def protonversion(timestamp: bool = False) -> Union[str, None, int]:
-    """Returns the version of proton"""
-    if timestamp:
-        return protontimeversion()
-    return protonnameversion()
 
 
 def once(
@@ -100,12 +140,11 @@ def once(
 
     def wrapper(*args, **kwargs) -> None:  # noqa: ANN002, ANN003
         func_id = f'{func.__module__}.{func.__name__}'
-        prefix = protonprefix()
-        directory = os.path.join(prefix, 'drive_c/protonfixes/run/')
-        file = os.path.join(directory, func_id)
-        if not os.path.exists(directory):
-            os.makedirs(directory)
-        if os.path.exists(file):
+        directory = protonprefix() / 'drive_c/protonfixes/run/'
+        file = directory / func_id
+        if not directory.is_dir():
+            directory.mkdir(parents=True)
+        if file.is_file():
             return
 
         exception = None
@@ -116,8 +155,7 @@ def once(
                 raise exc
             exception = exc
 
-        with open(file, 'a', encoding='ascii') as tmp:
-            tmp.close()
+        file.touch()
 
         if exception:
             raise exception
@@ -131,24 +169,28 @@ def _killhanging() -> None:
     """Kills processes that hang when installing winetricks"""
     # avoiding an external library as proc should be available on linux
     log.debug('Killing hanging wine processes')
-    pids = [pid for pid in os.listdir('/proc') if pid.isdigit()]
-    badexes = ['mscorsvw.exe']
-    for pid in pids:
+
+    black_list = ['mscorsvw.exe']
+    for path in Path('/proc').iterdir():
         try:
-            with open(os.path.join('/proc', pid, 'cmdline'), 'rb') as proc_cmd:
-                cmdline = proc_cmd.read()
-                for exe in badexes:
-                    if exe in cmdline.decode():
-                        os.kill(int(pid), signal.SIGKILL)
-        except OSError:
+            cmd = path / 'cmdline'
+            if not cmd.is_file():
+                continue
+
+            cmdline = cmd.read_text(encoding='ascii')
+            if any([i in cmdline for i in black_list]):
+                log.debug(f'Killing process #{path.stem}')
+                os.kill(int(path.stem), signal.SIGKILL)
+        except OSError as ex:
+            log.debug(f'Failed to read cmd lines: {ex}')
             continue
 
 
 def _forceinstalled(verb: str) -> None:
     """Records verb into the winetricks.log.forced file"""
-    forced_log = os.path.join(protonprefix(), 'winetricks.log.forced')
-    with open(forced_log, 'a', encoding='ascii') as forcedlog:
-        forcedlog.write(verb + '\n')
+    forced_log = protonprefix() / 'winetricks.log.forced'
+    with forced_log.open('a') as file:
+        file.write(f'{verb}\n')
 
 
 def _checkinstalled(verb: str, logfile: str = 'winetricks.log') -> bool:
@@ -156,29 +198,14 @@ def _checkinstalled(verb: str, logfile: str = 'winetricks.log') -> bool:
     if not isinstance(verb, str):
         return False
 
-    winetricks_log = os.path.join(protonprefix(), logfile)
-
-    # Check for 'verb=param' verb types
-    if len(verb.split('=')) > 1:
-        wt_verb = verb.split('=')[0] + '='
-        wt_verb_param = verb.split('=')[1]
-        wt_is_set = False
-        try:
-            with open(winetricks_log, encoding='ascii') as tricklog:
-                for xline in tricklog.readlines():
-                    if re.findall(r'^' + wt_verb, xline.strip()):
-                        wt_is_set = bool(xline.strip() == wt_verb + wt_verb_param)
-            return wt_is_set
-        except OSError:
-            return False
-    # Check for regular verbs
+    winetricks_log = protonprefix() / logfile
     try:
-        with open(winetricks_log, encoding='ascii') as tricklog:
-            if verb in reversed([x.strip() for x in tricklog.readlines()]):
-                return True
+        lines = winetricks_log.read_text(encoding='ascii').splitlines()
+        lines = [line.strip() for line in lines]
+        return verb in lines
     except OSError:
+        log.warn(f'Can not check installed verbs for "{verb}" in file "{winetricks_log}".')
         return False
-    return False
 
 
 def checkinstalled(verb: str) -> bool:
@@ -186,13 +213,13 @@ def checkinstalled(verb: str) -> bool:
     if verb == 'gui':
         return False
 
-    log.info(f'Checking if winetricks {verb} is installed')
+    log.info(f'Checking if winetricks "{verb}" is installed')
     if _checkinstalled(verb, 'winetricks.log.forced'):
         return True
     return _checkinstalled(verb)
 
 
-def is_custom_verb(verb: str) -> Union[bool, str]:
+def is_custom_verb(verb: str) -> Union[bool, Path]:
     """Returns path to custom winetricks verb, if found"""
     if verb == 'gui':
         return False
@@ -201,16 +228,18 @@ def is_custom_verb(verb: str) -> Union[bool, str]:
     verb_dir = 'verbs'
 
     # check local custom verbs
-    verbpath = os.path.expanduser('~/.config/protonfixes/localfixes/' + verb_dir)
-    if os.path.isfile(os.path.join(verbpath, verb_name)):
-        log.debug('Using local custom winetricks verb from: ' + verbpath)
-        return os.path.join(verbpath, verb_name)
+    verb_path = (Path.home() / '.config/protonfixes/localfixes/') / verb_dir
+    verb_file = verb_path / verb_name
+    if verb_file.is_file():
+        log.debug(f'Using local custom winetricks verb from: {verb_path}')
+        return verb_file
 
     # check custom verbs
-    verbpath = os.path.join(os.path.dirname(__file__), verb_dir)
-    if os.path.isfile(os.path.join(verbpath, verb_name)):
-        log.debug('Using custom winetricks verb from: ' + verbpath)
-        return os.path.join(verbpath, verb_name)
+    verb_path = Path(__file__).parent / verb_dir
+    verb_file = verb_path / verb_name
+    if verb_file.is_file():
+        log.debug(f'Using custom winetricks verb from: {verb_path}')
+        return verb_file
 
     return False
 
@@ -238,14 +267,14 @@ def protontricks(verb: str) -> bool:
 
         log.info('Installing winetricks ' + verb)
         env = dict(protonmain.g_session.env)
-        env['WINEPREFIX'] = protonprefix()
+        env['WINEPREFIX'] = str(protonprefix())
         env['WINE'] = protonmain.g_proton.wine_bin
         env['WINELOADER'] = protonmain.g_proton.wine_bin
         env['WINESERVER'] = protonmain.g_proton.wineserver_bin
         env['WINETRICKS_LATEST_VERSION_CHECK'] = 'disabled'
         env['LD_PRELOAD'] = ''
 
-        winetricks_bin = os.path.abspath(__file__).replace('util.py', 'winetricks')
+        winetricks_bin = Path(__file__).with_name('winetricks')
         winetricks_cmd = [winetricks_bin, '--unattended'] + verb.split(' ')
         if verb == 'gui':
             winetricks_cmd = [winetricks_bin, '--unattended']
@@ -259,7 +288,7 @@ def protontricks(verb: str) -> bool:
             log.warn('No winetricks was found in $PATH')
 
         if winetricks_bin is not None:
-            log.debug('Using winetricks command: ' + str(winetricks_cmd))
+            log.debug(f'Using winetricks command: {winetricks_cmd}')
 
             # make sure proton waits for winetricks to finish
             for idx, arg in enumerate(sys.argv):
@@ -267,7 +296,7 @@ def protontricks(verb: str) -> bool:
                     sys.argv[idx] = arg.replace('run', 'waitforexitandrun')
                     log.debug(str(sys.argv))
 
-            log.info('Using winetricks verb ' + verb)
+            log.info(f'Using winetricks verb "{verb}"')
             subprocess.call([env['WINESERVER'], '-w'], env=env)
             with subprocess.Popen(winetricks_cmd, env=env) as process:
                 process.wait()
@@ -299,7 +328,7 @@ def regedit_add(
 ) -> None:
     """Add regedit keys"""
     env = dict(protonmain.g_session.env)
-    env['WINEPREFIX'] = protonprefix()
+    env['WINEPREFIX'] = str(protonprefix())
     env['WINE'] = protonmain.g_proton.wine_bin
     env['WINELOADER'] = protonmain.g_proton.wine_bin
     env['WINESERVER'] = protonmain.g_proton.wineserver_bin
@@ -400,13 +429,11 @@ def del_environment(envvar: str) -> None:
         del protonmain.g_session.env[envvar]
 
 
-def get_game_install_path() -> str:
+def get_game_install_path() -> Path:
     """Game installation path"""
-    install_path = os.environ['PWD']
-    if 'STEAM_COMPAT_INSTALL_PATH' in os.environ:
-        install_path = os.environ['STEAM_COMPAT_INSTALL_PATH']
-    log.debug('Detected path to game: ' + install_path)
-    # only for `waitforexitandrun` command
+    path = os.environ.get('STEAM_COMPAT_INSTALL_PATH')
+    install_path = Path(path) if path else Path.cwd()
+    log.debug(f'Detected path to game: {install_path}')
     return install_path
 
 
@@ -461,9 +488,9 @@ def patch_libcuda() -> bool:
                 # Parse the line to extract the path
                 parts = line.strip().split(' => ')
                 if len(parts) == 2:
-                    path = parts[1].strip()
-                    if os.path.exists(path):
-                        libcuda_path = os.path.abspath(path)
+                    path = Path(parts[1].strip())
+                    if path.is_file():
+                        libcuda_path = path
                         break
 
         if not libcuda_path:
@@ -507,7 +534,7 @@ def patch_libcuda() -> bool:
             return False
 
         log.info(f'Patched libcuda.so saved to: {patched_library}')
-        set_environment('LD_PRELOAD', patched_library)
+        set_environment('LD_PRELOAD', str(patched_library))
         return True
 
     except Exception as e:
@@ -556,13 +583,10 @@ def disable_uplay_overlay() -> bool:
     UPlay will overwrite settings.yml on launch, but keep
     this setting.
     """
-    config_dir = os.path.join(
-        protonprefix(),
-        'drive_c/users/steamuser/Local Settings/Application Data/Ubisoft Game Launcher/',
-    )
-    config_file = os.path.join(config_dir, 'settings.yml')
+    config_dir = protonprefix() / 'drive_c/users/steamuser/Local Settings/Application Data/Ubisoft Game Launcher/'
+    config_file = config_dir / 'settings.yml'
 
-    os.makedirs(config_dir, exist_ok=True)
+    config_dir.mkdir(parents=True, exist_ok=True)
 
     try:
         data = (
@@ -574,12 +598,12 @@ def disable_uplay_overlay() -> bool:
             'user:\n'
             '  closebehavior: CloseBehavior_Close'
         )
-        with open(config_file, 'a+', encoding='ascii') as file:
+        with config_file.open('a', encoding='ascii') as file:
             file.write(data)
         log.info('Disabled UPlay overlay')
         return True
     except OSError as err:
-        log.warn('Could not disable UPlay overlay: ' + err.strerror)
+        log.warn(f'Could not disable UPlay overlay: {err.strerror}')
 
     return False
 
@@ -593,88 +617,81 @@ def create_dosbox_conf(
     option;, each subsequent one overwrites settings defined in
     previous files.
     """
-    if os.access(conf_file, os.F_OK):
+    conf_file = Path(conf_file)
+    if conf_file.is_file():
         return
     conf = configparser.ConfigParser()
     conf.read_dict(conf_dict)
-    with open(conf_file, 'w', encoding='ascii') as file:
+    with conf_file.open('w', encoding='ascii') as file:
         conf.write(file)
 
 
-def _get_case_insensitive_name(path: str) -> str:
+def _get_case_insensitive_name(path: Path) -> Path:
     """Find potentially differently-cased location
 
     e.g /path/to/game/system/gothic.ini -> /path/to/game/System/GOTHIC.INI
     """
-    if os.path.exists(path):
+    # FIXME: Function could be replaced by glob with arg `case_sensitve=False` in Python 3.12
+    if path.exists():
         return path
-    root = path
-    # Find first existing directory in the tree
-    while not os.path.exists(root):
-        root = os.path.split(root)[0]
 
-    if root[len(root) - 1] not in ['/', '\\']:
-        root = root + os.sep
-    # Separate missing path from existing root
-    s_working_dir = path.replace(root, '').split(os.sep)
-    paths_to_find = len(s_working_dir)
-    # Keep track of paths we found so far
-    paths_found = 0
-    # Walk through missing paths
-    for directory in s_working_dir:
-        if not os.path.exists(root):
-            break
-        dir_list = os.listdir(root)
-        found = False
-        for existing_dir in dir_list:
-            # Find matching filename on drive
-            if existing_dir.lower() == directory.lower():
-                root = os.path.join(root, existing_dir)
-                paths_found += 1
-                found = True
-        # If path was not found append case that we were looking for
-        if not found:
-            root = os.path.join(root, directory)
-            paths_found += 1
+    # Parents are from nearest to farthest, we need to reverse them
+    # The parents do not include the Path object itself.. obviously
+    paths = list(reversed(path.parents)) + [path]
+    resolved = paths[0]
 
-    # Append rest of the path if we were unable to find directory at any level
-    if paths_to_find != paths_found:
-        root = os.path.join(root, os.sep.join(s_working_dir[paths_found:]))
-    return root
+    for i, part in enumerate(path.parts):
+        current = resolved / part
+        if current.exists():
+            resolved = current
+            continue
+
+        # Mapping casefold file name in folder to it's Path()
+        files = {file.name.casefold(): file for file in current.parent.iterdir()}
+        cf_part = part.casefold()
+        if cf_part in files:
+            resolved = files[cf_part]
+        else:
+            unresolved = list(path.parts[i:])
+            log.warn(f'Can not resolve case sensitive path "{path}", stopped after "{resolved}"')
+            log.info(f'Returning resolved path, with non resolvable parts {unresolved} attached')
+            return resolved / str.join('/', unresolved)
+
+    log.debug(f'Resolved case sensitive path "{path}" -> "{resolved}"')
+    return resolved
 
 
-def _get_config_full_path(cfile: str, base_path: str) -> Union[str, None]:
+def _get_config_full_path(cfile: StrPath, base_path: str) -> Optional[Path]:
     """Find game's config file"""
     # Start from 'user'/'game' directories or absolute path
     if base_path == 'user':
-        cfg_path = os.path.join(
-            protonprefix(), 'drive_c/users/steamuser/My Documents', cfile
-        )
+        cfg_path = protonprefix() / 'drive_c/users/steamuser/My Documents' / cfile
+    elif base_path == 'game':
+        cfg_path = get_game_install_path() / cfile
     else:
-        if base_path == 'game':
-            cfg_path = os.path.join(get_game_install_path(), cfile)
-        else:
-            cfg_path = cfile
+        cfg_path = Path(cfile)
     cfg_path = _get_case_insensitive_name(cfg_path)
 
-    if os.path.exists(cfg_path) and os.access(cfg_path, os.F_OK):
-        log.debug('Found config file: ' + cfg_path)
+    if cfg_path.is_file():
+        log.debug(f'Found config file: {cfg_path}')
         return cfg_path
 
-    log.warn('Config file not found: ' + cfg_path)
+    log.warn(f'Config file not found: {cfg_path}')
     return None
 
 
-def create_backup_config(cfg_path: str) -> None:
+def create_backup_config(cfg_path: Path) -> bool:
     """Create backup config file"""
-    # Backup
-    if not os.path.exists(cfg_path + '.protonfixes.bak'):
-        log.info('Creating backup for config file')
-        shutil.copyfile(cfg_path, cfg_path + '.protonfixes.bak')
+    backup_path = cfg_path.with_name(cfg_path.name + '.protonfixes.bak')
+    if not backup_path.is_file():
+        log.info(f'Creating backup for config file "{cfg_path}" -> "{backup_path}"')
+        shutil.copyfile(cfg_path, backup_path)
+        return True
+    return False
 
 
 def set_ini_options(
-    ini_opts: str, cfile: str, encoding: str, base_path: str = 'user'
+    ini_opts: str, cfile: StrPath, encoding: str, base_path: str = 'user'
 ) -> bool:
     """Edit game's INI config file"""
     cfg_path = _get_config_full_path(cfile, base_path)
@@ -691,45 +708,38 @@ def set_ini_options(
 
     conf.read(cfg_path, encoding)
 
-    log.info(f'Addinging INI options into {cfile}:\n{str(ini_opts)}')
+    log.info(f'Addinging INI options into "{cfile}":\n{ini_opts}')
     conf.read_string(ini_opts)
 
-    with open(cfg_path, 'w', encoding=encoding) as configfile:
+    with cfg_path.open('w', encoding=encoding) as configfile:
         conf.write(configfile)
     return True
 
 
 def set_xml_options(
-    base_attibutte: str, xml_line: str, cfile: str, base_path: str = 'user'
+    base_attibutte: str, xml_line: str, cfile: StrPath, base_path: str = 'user'
 ) -> bool:
     """Edit game's XML config file"""
     xml_path = _get_config_full_path(cfile, base_path)
     if not xml_path:
         return False
 
-    create_backup_config(xml_path)
-
-    # set options
-
-    base_size = os.path.getsize(xml_path)
-    backup_size = os.path.getsize(xml_path + '.protonfixes.bak')
-
-    if base_size != backup_size:
+    # Check if backup already exists
+    if not create_backup_config(xml_path):
         return False
 
-    with open(xml_path, encoding='utf-8') as file:
-        contents = file.readlines()
-        i = 0
-        for line in contents:
-            i += 1
-            if base_attibutte in line:
-                log.info(f'Adding XML options into {cfile}, line {i}:\n{xml_line}')
-                contents.insert(i, xml_line + '\n')
+    # set options
+    i = 0
+    contents = xml_path.read_text(encoding='utf-8').splitlines()
+    for line in contents:
+        i += 1
+        if base_attibutte not in line:
+            continue
+        log.info(f'Adding XML options into "{cfile}", line {i}:\n{xml_line}')
+        contents.insert(i, xml_line + '\n')
 
-    with open(xml_path, 'w', encoding='utf-8') as file:
-        for eachitem in contents:
-            file.write(eachitem)
-
+    data = str.join('\n', contents)
+    xml_path.write_text(data, encoding='utf-8')
     log.info('XML config patch applied')
     return True
 
@@ -737,64 +747,58 @@ def set_xml_options(
 def get_resolution() -> tuple[int, int]:
     """Returns screen res width, height using xrandr"""
     # Execute xrandr command and capture its output
-    xrandr_bin = os.path.abspath(__file__).replace('util.py', 'xrandr')
-    xrandr_output = subprocess.check_output([xrandr_bin, '--current']).decode('utf-8')
+    xrandr_bin = Path(__file__).with_name('xrandr')
+    xrandr_output = subprocess.check_output([xrandr_bin, '--current'], text=True)
 
-    # Find the line that starts with 'Screen   0:' and extract the resolution
-    for line in xrandr_output.splitlines():
-        if 'primary' in line:
-            resolution = line.split()[3]
-            width_height = resolution.split('x')
-            offset_values = width_height[1].split('+')
-            clean_resolution = width_height[0] + 'x' + offset_values[0]
-            screenx, screeny = clean_resolution.split('x')
-            return (int(screenx), int(screeny))
-
-    # If no resolution is found, return default values or raise an exception
-    return (0, 0)  # or raise Exception('Resolution not found')
-
-
-def read_dxvk_conf(cfp: TextIOWrapper) -> Generator[str, None, None]:
-    """Add fake [DEFAULT] section to dxvk.conf"""
-    yield f'[{configparser.ConfigParser().default_section}]'
-    yield from cfp
+    # Example line: "DP-1 connected primary 5120x1440+0+0 (normal left inverted right x axis y axis) 1193mm x 336mm"
+    res_match = re.search(r'connected primary (?P<x>\d{3,5})x(?P<y>\d{3,5})', xrandr_output)
+    if not res_match:
+        log.warn('Can not extract resolution from xrandr')
+        return (0, 0) # or raise Exception('Resolution not found')
+    
+    x = res_match.group('x')
+    y = res_match.group('y')
+    return (int(x), int(y))
 
 
 def set_dxvk_option(
-    opt: str, val: str, cfile: str = '/tmp/protonfixes_dxvk.conf'
+    opt: str, val: str, cfile: Path = Path('/tmp/protonfixes_dxvk.conf')
 ) -> None:
     """Create custom DXVK config file
 
     See https://github.com/doitsujin/dxvk/wiki/Configuration for details
     """
     conf = configparser.ConfigParser()
-    conf.optionxform = str
-    section = conf.default_section
-    dxvk_conf = os.path.join(os.environ['PWD'], 'dxvk.conf')
-
+    # Preserve option name case (default converts to lower case)
+    conf.optionxform = lambda optionstr: optionstr
     conf.read(cfile)
 
-    if (
-        not conf.has_option(section, 'session')
-        or conf.getint(section, 'session') != os.getpid()
-    ):
-        log.info('Creating new DXVK config')
-        set_environment('DXVK_CONFIG_FILE', cfile)
+    # FIXME: Python 3.13 implements `allow_unnamed_section=True`
+    section = conf.default_section
+    if conf.has_option(section, 'session') and conf.getint(section, 'session') == os.getpid():
+        return
 
-        conf = configparser.ConfigParser()
-        conf.optionxform = str
-        conf.set(section, 'session', str(os.getpid()))
+    log.info('Creating new DXVK config')
+    set_environment('DXVK_CONFIG_FILE', str(cfile))
 
-        if os.access(dxvk_conf, os.F_OK):
-            with open(dxvk_conf, encoding='ascii') as dxvk:
-                conf.read_file(read_dxvk_conf(dxvk))
-        log.debug(f'{conf.items(section)}')
+    conf = configparser.ConfigParser()
+    # Preserve option name case (default converts to lower case)
+    conf.optionxform = lambda optionstr: optionstr
+    conf.set(section, 'session', str(os.getpid()))
+
+    # Add configuration from game's directory
+    dxvk_conf = get_game_install_path() / 'dxvk.conf'
+    if dxvk_conf.is_file():
+        text = dxvk_conf.read_text(encoding='ascii')
+        conf.read_string(f'[{section}]\n{text}')
+
+    log.debug(f'DXVK config:\n{conf.items(section)}')
 
     # set option
-    log.info('Addinging DXVK option: ' + str(opt) + ' = ' + str(val))
+    log.info(f'Addinging DXVK option: "{opt}" = "{val}"')
     conf.set(section, opt, str(val))
 
-    with open(cfile, 'w', encoding='ascii') as configfile:
+    with cfile.open('w', encoding='ascii') as configfile:
         conf.write(configfile)
 
 
@@ -808,7 +812,7 @@ def install_battleye_runtime() -> None:
     install_app('1161040')
 
 
-def install_all_from_tgz(url: str, path: str = os.getcwd()) -> None:
+def install_all_from_tgz(url: str, path: StrPath = get_game_install_path()) -> None:
     """Install all files from a downloaded tar.gz"""
     cache_dir = os.path.expanduser('~/.cache/protonfixes')
     os.makedirs(cache_dir, exist_ok=True)
@@ -824,10 +828,10 @@ def install_all_from_tgz(url: str, path: str = os.getcwd()) -> None:
         tgz_obj.extractall(path)
 
 
-def install_from_zip(url: str, filename: str, path: str = os.getcwd()) -> None:
+def install_from_zip(url: str, filename: str, path: Path = get_game_install_path()) -> None:
     """Install a file from a downloaded zip"""
-    if filename in os.listdir(path):
-        log.info(f'File {filename} found in {path}')
+    if (path / filename).is_file():
+        log.info(f'File "{filename}" found in "{path}"')
         return
 
     cache_dir = os.path.expanduser('~/.cache/protonfixes')
@@ -835,12 +839,12 @@ def install_from_zip(url: str, filename: str, path: str = os.getcwd()) -> None:
     zip_file_name = os.path.basename(url)
     zip_file_path = os.path.join(cache_dir, zip_file_name)
 
-    if zip_file_name not in os.listdir(cache_dir):
-        log.info(f'Downloading {filename} to {zip_file_path}')
+    if not zip_file_path.is_file():
+        log.info(f'Downloading "{filename}" to "{zip_file_path}"')
         urllib.request.urlretrieve(url, zip_file_path)
 
     with zipfile.ZipFile(zip_file_path, 'r') as zip_obj:
-        log.info(f'Extracting {filename} to {path}')
+        log.info(f'Extracting "{filename}" to "{path}"')
         zip_obj.extract(filename, path=path)
 
 
@@ -955,18 +959,69 @@ def set_game_drive(enabled: bool) -> None:
     This function modifies the `compat_config` to include or exclude
     the "gamedrive" option based on the `enabled` parameter.
 
-    Parameters
-    ----------
-    enabled : bool
-        If True, add "gamedrive" to `compat_config`.
-        If False, remove "gamedrive" from `compat_config`.
-
-    Returns
-    -------
-    None
+    Args:
+        enabled (bool):
+            If True, add "gamedrive" to `compat_config`.
+            If False, remove "gamedrive" from `compat_config`.
 
     """
     if enabled:
         protonmain.g_session.compat_config.add('gamedrive')
     else:
-        protonmain.g_session.compat_config.discard('gamedrive')
+        protonmain.g_session.compat_config.discard("gamedrive")
+
+
+def create_dos_device(letter: str = 'r', dev_type: DosDevice = DosDevice.CD_ROM) -> bool:
+    """Create a symlink to '/tmp' in the dosdevices folder of the prefix and register it
+
+    Args:
+        letter (str, optional): Letter that the device gets assigned to, must be len = 1
+        dev_type (DosDevice, optional): The device's type which will be registered to wine
+
+    Returns:
+        bool: True, if device was created
+
+    """
+    assert len(letter) == 1
+
+    dosdevice = protonprefix() / f'dosdevices/{letter}:'
+    if dosdevice.exists():
+        return False
+
+    # Create a symlink in dosdevices
+    dosdevice.symlink_to('/tmp', True)
+
+    # designate device as CD-ROM, requires 64-bit access
+    regedit_add('HKLM\\Software\\Wine\\Drives', f'{letter}:', 'REG_SZ', dev_type.value, True)
+    return True
+
+
+def patch_conf_value(file: Path, key: str, value: ReplaceType) -> None:
+    """Patches a single value in the given config file
+
+    Args:
+        file (Path): Path to the config file to patch
+        key (str): The key of the value to patch
+        value (ReplaceType): The value that should be replaced
+
+    """
+    if not file.is_file():
+        log.warn(f'File "{file}" can not be opened to patch config value.')
+        return
+
+    conf = file.read_text()
+    regex = rf"^\s*(?P<name>{key}\s*=\s*)(?P<value>{value.from_value})\s*$"
+    conf = re.sub(regex, rf'\g<name>{value.to_value}', conf, flags=re.MULTILINE)
+    file.write_text(conf)
+
+
+def patch_voodoo_conf(file: Path = get_path_syswow64() / 'dgvoodoo.conf', key: str = 'Resolution', value: ReplaceType = ReplaceType('unforced', 'max')) -> None:
+    """Patches the dgVoodoo2 config file. By default `Resolution` will be set from `unforced` to `max`.
+
+    Args:
+        file (Path, optional): Path to the config file to patch
+        key (str, optional): The key of the value to patch
+        value (ReplaceType, optional): The value that should be replaced
+
+    """
+    patch_conf_value(file, key, value)

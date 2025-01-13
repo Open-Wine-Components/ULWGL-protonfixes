@@ -1,18 +1,27 @@
 """Game fix for FFX/X-2 HD Remaster"""
 
-import os
 from protonfixes import util
 
 
 def main() -> None:
     # Game defaults to Japanese language, set this to English instead
-    configpath = os.path.join(
-        util.protonprefix(),
-        'drive_c/users/steamuser/My Documents/SQUARE ENIX/FINAL FANTASY X&X-2 HD Remaster',
+    config_path = (
+        util.protonprefix()
+        / 'drive_c/users/steamuser/My Documents/'
+          'SQUARE ENIX/FINAL FANTASY X&X-2 HD Remaster'
     )
-    if not os.path.exists(configpath):
-        os.makedirs(configpath)
-    configgame = os.path.join(configpath, 'GameSetting.ini')
-    if not os.path.isfile(configgame):
-        with open(configgame, 'w+', encoding='utf-8') as f:
-            f.write('Language=en')
+
+    # Ensure path exists
+    config_path.mkdir(parents=True, exist_ok=True)
+
+    # Find / create config file
+    config_file = config_path / 'GameSetting.ini'
+    config_file.touch()
+
+    # Apply patch
+    config = config_file.read_text(encoding='utf-8')
+    if 'Language' in config:
+        return
+
+    config += '\nLanguage=en'
+    config_file.write_text(config, encoding='utf-8')
