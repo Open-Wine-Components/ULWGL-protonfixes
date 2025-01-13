@@ -19,7 +19,8 @@ except ImportError:
 try:
     import __main__ as protonmain
 except ImportError:
-    log.warn('Unable to hook into Proton main script environment')
+    log.crit('Unable to hook into Proton main script environment')
+    exit()
 
 
 @lru_cache

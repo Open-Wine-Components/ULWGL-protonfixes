@@ -17,35 +17,53 @@ jobs:
         with:
           submodules: recursive
           fetch-depth: 0
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           # The Steam Runtime platform (sniper) uses Python 3.9
           python-version: "3.9"
-      - name: Install dependencies
+          cache: 'pip' # caching pip dependencies
+
+      - name: Install Python dependencies
         run: |
-          sudo apt-get install shellcheck
-          python3 -m pip install --upgrade pip
-          pip install ruff
           pip install ijson
           pip install trio
           pip install "git+https://github.com/njbooher/steam.git@wsproto#egg=steam[client]"
-      - name: Lint with Shellcheck
-        run: |
-          shellcheck winetricks
+
+      # PyRight, the unit tests, and other scripts import/resolve the "protonfixes" module
+      # We are using the path "umu-protonfixes", which isn't a valid module name and can't be used
+      # However: this simple, hacky symbolic link in the parent folder can fix this inconvenience
+      - name: Fix python module resolution
+        run: ln -rs . ../protonfixes
+
+      # FIXME: problem matcher is currently disabled upstream, using a fork for the moment
+      # https://github.com/ludeeus/action-shellcheck/pull/103
+      # FIXME: symlinks don't work upstream
+      # https://github.com/ludeeus/action-shellcheck/pull/104
+      - name: Run ShellCheck
+        uses: Root-Core/action-shellcheck@fork
+        with:
+          ignore_paths: subprojects # prevent ShellCheck from checking unrelated files
+          ignore_symlinks: false # winetricks is symlinked
+
+      # Ruff uses ruff.toml for it's configuration
       - name: Lint with Ruff
-        run: |
-          ruff check .
+        uses: astral-sh/ruff-action@v1
+
+      # Pyright uses pyproject.toml for it's configuration
+      - name: Static type checking with Pyright
+        uses: jakebailey/pyright-action@v2
+
       - name: Validate gamefix modules
         run: |
           python3 .github/scripts/check_gamefixes.py
           python3 .github/scripts/check_verbs.py
+
       - name: Validate gamefix imports 
         run: |
-          cd ..
-          ln -s umu-protonfixes protonfixes
-          cd protonfixes
           python3 .github/scripts/check_imports.py
+
       - name: Test with unittest
         run: |
           python3 protonfixes_test.py

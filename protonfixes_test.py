@@ -3,8 +3,6 @@ import os
 import tempfile
 from pathlib import Path
 from unittest.mock import patch, mock_open
-import io
-import urllib.request
 import fix
 
 
